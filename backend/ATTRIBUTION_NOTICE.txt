@@ -1,0 +1,37 @@
+AUTOPORTFOLIO ATTRIBUTION NOTICE
+================================
+
+This portfolio was generated using AutoPortfolio - Intelligent Automated Portfolio Generator
+
+🤖 AutoPortfolio Information:
+- Repository: https://github.com/v-vekpawar/autoportfolio
+- License: Custom Proprietary License
+- Author: Vivek Pawar (contact.vivekpawar@gmail.com)
+
+⚖️ LEGAL REQUIREMENTS:
+1. Attribution to AutoPortfolio MUST be maintained in all generated portfolios
+2. The watermark and attribution links CANNOT be removed or hidden
+3. This notice must be included with any distribution of the portfolio files
+4. Commercial use requires explicit permission from the author
+
+🚫 PROHIBITED ACTIONS:
+- Removing or hiding the AutoPortfolio watermark
+- Claiming the portfolio generator as your own work
+- Distributing modified versions without permission
+- Using for commercial purposes without authorization
+
+✅ PERMITTED ACTIONS:
+- Using the generated portfolio for personal/educational purposes
+- Customizing the content and styling (while maintaining attribution)
+- Sharing the portfolio with proper attribution intact
+
+📞 CONTACT:
+For questions, permissions, or license inquiries:
+- Email: contact.vivekpawar@gmail.com
+- GitHub: https://github.com/v-vekpawar/autoportfolio
+
+Generated on: {generation_date}
+Portfolio Owner: {portfolio_owner}
+
+---
+By using this generated portfolio, you acknowledge that you have read and agree to comply with the AutoPortfolio license terms and attribution requirements.

@@ -1,0 +1,86 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="50%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="100%" stop-color="#f1f5f9" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bgGradient)" />
+  
+  <!-- Background Pattern -->
+  <g opacity="0.1">
+    <circle cx="100" cy="100" r="50" fill="white" />
+    <circle cx="1100" cy="100" r="30" fill="white" />
+    <circle cx="200" cy="500" r="40" fill="white" />
+    <circle cx="1000" cy="500" r="60" fill="white" />
+    <rect x="50" y="300" width="80" height="80" rx="10" fill="white" />
+    <rect x="1070" y="250" width="60" height="60" rx="8" fill="white" />
+  </g>
+  
+  <!-- Main Logo -->
+  <g transform="translate(150, 200)">
+    <!-- Logo Circle -->
+    <circle cx="60" cy="60" r="55" fill="url(#logoGradient)" />
+    
+    <!-- Logo Icon -->
+    <g fill="#6366f1" fill-opacity="0.9">
+      <rect x="42" y="46" width="36" height="24" rx="6" />
+      <circle cx="48" cy="54" r="4.5" />
+      <circle cx="72" cy="54" r="4.5" />
+      <rect x="51" y="60" width="18" height="3" rx="1.5" />
+      
+      <!-- Tech lines -->
+      <path d="M24 60h12m48 0h12M60 24v12m0 48v12" stroke="#6366f1" stroke-width="6" stroke-opacity="0.6" fill="none" />
+      <path d="M36 36l6 6m36-6l-6 6M36 84l6-6m36 6l-6-6" stroke="#6366f1" stroke-width="4.5" stroke-opacity="0.4" fill="none" />
+      
+      <!-- Data nodes -->
+      <circle cx="24" cy="60" r="6" fill-opacity="0.7" />
+      <circle cx="96" cy="60" r="6" fill-opacity="0.7" />
+      <circle cx="60" cy="24" r="6" fill-opacity="0.7" />
+      <circle cx="60" cy="96" r="6" fill-opacity="0.7" />
+    </g>
+  </g>
+  
+  <!-- Main Text -->
+  <text x="300" y="280" font-family="Inter, system-ui, sans-serif" font-size="72" font-weight="bold" fill="white">
+    AutoPortfolio
+  </text>
+  
+  <!-- Subtitle -->
+  <text x="300" y="340" font-family="Inter, system-ui, sans-serif" font-size="32" font-weight="500" fill="rgba(255,255,255,0.9)">
+    Intelligent Automated Portfolio Generator
+  </text>
+  
+  <!-- Description -->
+  <text x="300" y="400" font-family="Inter, system-ui, sans-serif" font-size="24" font-weight="400" fill="rgba(255,255,255,0.8)">
+    Generate beautiful, professional portfolio websites automatically
+  </text>
+  <text x="300" y="440" font-family="Inter, system-ui, sans-serif" font-size="24" font-weight="400" fill="rgba(255,255,255,0.8)">
+    using your LinkedIn and GitHub profiles.
+  </text>
+  
+  <!-- Features -->
+  <g transform="translate(300, 480)">
+    <text x="0" y="0" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="500" fill="rgba(255,255,255,0.9)">
+      ✨ AI-Powered Extraction
+    </text>
+    <text x="220" y="0" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="500" fill="rgba(255,255,255,0.9)">
+      🚀 Lightning Fast
+    </text>
+    <text x="380" y="0" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="500" fill="rgba(255,255,255,0.9)">
+      📱 Fully Responsive
+    </text>
+  </g>
+  
+  <!-- URL -->
+  <text x="300" y="570" font-family="Inter, system-ui, sans-serif" font-size="20" font-weight="400" fill="rgba(255,255,255,0.7)">
+    github.com/v-vekpawar/autoportfolio
+  </text>
+</svg>

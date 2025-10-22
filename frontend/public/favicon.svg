@@ -1,0 +1,31 @@
+<svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="faviconGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="50%" stop-color="#8b5cf6" />
+      <stop offset="100%" stop-color="#06b6d4" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="24" cy="24" r="22" fill="url(#faviconGradient)" />
+  
+  <!-- Inner tech pattern -->
+  <g fill="white" fill-opacity="0.95">
+    <!-- Central robot/AI symbol -->
+    <rect x="18" y="16" width="12" height="8" rx="2" />
+    <circle cx="20" cy="19" r="1.5" />
+    <circle cx="28" cy="19" r="1.5" />
+    <rect x="21" y="21" width="6" height="1" rx="0.5" />
+    
+    <!-- Tech circuit lines -->
+    <path d="M12 24h4m16 0h4M24 12v4m0 16v4" stroke="white" stroke-width="2" stroke-opacity="0.6" fill="none" />
+    <path d="M16 16l2 2m12-2l-2 2M16 32l2-2m12 2l-2-2" stroke="white" stroke-width="1.5" stroke-opacity="0.4" fill="none" />
+    
+    <!-- Data nodes -->
+    <circle cx="12" cy="24" r="2" fill-opacity="0.7" />
+    <circle cx="36" cy="24" r="2" fill-opacity="0.7" />
+    <circle cx="24" cy="12" r="2" fill-opacity="0.7" />
+    <circle cx="24" cy="36" r="2" fill-opacity="0.7" />
+  </g>
+</svg>

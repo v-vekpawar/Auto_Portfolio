@@ -1,0 +1,97 @@
+AutoPortfolio Custom License
+
+Copyright (c) 2025 AutoPortfolio. All rights reserved.
+
+TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION
+
+1. DEFINITIONS
+   "Software" refers to the AutoPortfolio application, including all source code, 
+   documentation, and associated files.
+   "You" refers to the individual or entity using this Software.
+   "Author" refers to the original creator and copyright holder of this Software.
+
+2. GRANT OF LICENSE
+   Subject to the terms and conditions of this License, the Author hereby grants 
+   You a limited, non-exclusive, non-transferable license to:
+   a) Use the Software for personal, educational, or commercial purposes
+   b) Run and execute the Software on your local systems
+   c) Make modifications to the Software for your own use
+
+3. RESTRICTIONS
+   You are NOT permitted to:
+   a) Distribute, share, or publish the original Software or any modified versions
+   b) Copy the Software or any portion thereof to other projects or repositories
+   c) Sublicense, sell, or transfer the Software to third parties
+   d) Remove or alter any copyright notices or license terms
+   e) Use the Software's code as a base for creating derivative works for distribution
+   f) Upload modified versions to public repositories without explicit written approval
+
+4. MODIFICATION POLICY
+   a) You may modify the Software for your personal use only
+   b) All modifications must remain on your local development environment
+   c) To contribute modifications back to the project, you must:
+      - Submit a pull request to the original repository
+      - Wait for explicit approval from the Author
+      - Only push approved changes to the original repository
+   d) Unauthorized distribution of modified versions is strictly prohibited
+
+5. APPROVAL PROCESS FOR CONTRIBUTIONS
+   a) All proposed changes must be submitted via GitHub pull requests
+   b) The Author reserves the right to accept, reject, or request modifications
+   c) Only changes explicitly approved by the Author may be merged
+   d) Contributors retain no ownership rights over approved contributions
+
+6. PROHIBITED USES
+   You may NOT use this Software for:
+   a) Any illegal activities or purposes
+   b) Any commercial use
+   c) Violating third-party terms of service (including LinkedIn, GitHub, etc.)
+   d) Mass data harvesting or scraping beyond personal portfolio creation
+   e) Creating competing products or services
+   f) Any activity that could harm the reputation of the Software or Author
+
+7. DISCLAIMER OF WARRANTY
+   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. THE AUTHOR MAKES NO
+   WARRANTIES ABOUT THE SUITABILITY, RELIABILITY, AVAILABILITY, TIMELINESS,
+   OR ACCURACY OF THE SOFTWARE.
+
+8. LIMITATION OF LIABILITY
+   IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER
+   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+   THE SOFTWARE. THIS INCLUDES BUT IS NOT LIMITED TO:
+   a) Data loss or corruption
+   b) System failures or security breaches
+   c) Legal issues arising from misuse of the Software
+   d) Violations of third-party terms of service
+   e) Any consequences of LinkedIn scraping or data extraction activities
+
+9. USER RESPONSIBILITY AND LEGAL COMPLIANCE
+   a) You are solely responsible for ensuring your use complies with all applicable laws
+   b) You are responsible for compliance with LinkedIn, GitHub, and other platform terms
+   c) Any legal consequences arising from your use of the Software are your responsibility
+   d) You agree to indemnify and hold harmless the Author from any legal claims
+
+10. TERMINATION
+    This license is effective until terminated. Your rights under this license will
+    terminate automatically without notice if you fail to comply with any term(s)
+    of this license. Upon termination, you must cease all use and destroy all
+    copies of the Software.
+
+11. ENFORCEMENT
+    a) Violation of this license may result in legal action
+    b) The Author reserves the right to pursue all available legal remedies
+    c) Users who violate these terms may be held legally and financially responsible
+    d) This license is governed by the laws of [Your Jurisdiction]
+
+12. CONTACT FOR PERMISSIONS
+    For any permissions beyond those granted in this license, contact:
+    contact.vivekpawar@gmail.com
+    https://github.com/v-vekpawar
+
+BY USING THIS SOFTWARE, YOU ACKNOWLEDGE THAT YOU HAVE READ THIS LICENSE,
+UNDERSTAND IT, AND AGREE TO BE BOUND BY ITS TERMS AND CONDITIONS.
+
+Last Updated: October 2025
