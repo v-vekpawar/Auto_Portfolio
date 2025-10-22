@@ -12,7 +12,15 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, origins=['http://localhost:3000', 'http://127.0.0.1:3000'])
+# Configure CORS for production and development
+allowed_origins = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'https://autoportfolio.vercel.app',  # Replace with your actual Vercel domain
+    'https://*.vercel.app'  # Allow all Vercel preview deployments
+]
+
+CORS(app, origins=allowed_origins)
 
 # Configure upload folder
 UPLOAD_FOLDER = 'uploads'
@@ -251,4 +259,6 @@ def download_portfolio():
         return jsonify({'error': f'Failed to generate portfolio: {str(e)}'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5001)
+    port = int(os.environ.get('PORT', 5001))
+    debug = os.environ.get('FLASK_DEBUG', 'False').lower() == 'true'
+    app.run(debug=debug, host='0.0.0.0', port=port)

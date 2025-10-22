@@ -5,6 +5,7 @@ import './globals.css'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'https://autoportfolio.vercel.app'),
   title: 'AutoPortfolio - Intelligent Automated Portfolio Generator',
   description: 'Generate beautiful, professional portfolio websites automatically using your LinkedIn and GitHub profiles. Create stunning portfolios in minutes with AI-powered data extraction.',
   keywords: 'portfolio, generator, linkedin, github, resume, automated, professional, AI, portfolio builder, web development',
