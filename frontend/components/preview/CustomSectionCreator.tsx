@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '../ui/card';
+import { Button } from '../ui/button';
+import { Input } from '../ui/input';
+import { Badge } from '../ui/badge';
 import { Plus, X, Save, Trash2, Edit } from 'lucide-react';
 
 interface CustomSection {
@@ -163,35 +163,35 @@ function CustomSectionModal({ section, onSave, onClose }: CustomSectionModalProp
   };
 
   const addListItem = () => {
-    setContent(prev => ({
+    setContent((prev: any) => ({
       ...prev,
       items: [...prev.items, '']
     }));
   };
 
   const updateListItem = (index: number, value: string) => {
-    setContent(prev => ({
+    setContent((prev: any) => ({
       ...prev,
       items: prev.items.map((item: string, i: number) => i === index ? value : item)
     }));
   };
 
   const removeListItem = (index: number) => {
-    setContent(prev => ({
+    setContent((prev: any) => ({
       ...prev,
       items: prev.items.filter((_: any, i: number) => i !== index)
     }));
   };
 
   const addTimelineEvent = () => {
-    setContent(prev => ({
+    setContent((prev: any) => ({
       ...prev,
       events: [...prev.events, { title: '', description: '', date: '' }]
     }));
   };
 
   const updateTimelineEvent = (index: number, field: string, value: string) => {
-    setContent(prev => ({
+    setContent((prev: any) => ({
       ...prev,
       events: prev.events.map((event: any, i: number) => 
         i === index ? { ...event, [field]: value } : event
@@ -200,7 +200,7 @@ function CustomSectionModal({ section, onSave, onClose }: CustomSectionModalProp
   };
 
   const removeTimelineEvent = (index: number) => {
-    setContent(prev => ({
+    setContent((prev: any) => ({
       ...prev,
       events: prev.events.filter((_: any, i: number) => i !== index)
     }));

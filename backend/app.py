@@ -20,6 +20,12 @@ allowed_origins = [
     'https://*.vercel.app'  # Allow all Vercel preview deployments
 ]
 
+# Get additional origins from environment variable
+cors_origins_env = os.getenv('CORS_ORIGINS', '')
+if cors_origins_env:
+    additional_origins = [origin.strip() for origin in cors_origins_env.split(',')]
+    allowed_origins.extend(additional_origins)
+    
 CORS(app, origins=allowed_origins)
 
 # Configure upload folder

@@ -12,65 +12,93 @@ interface AddSectionModalProps {
   onClose: () => void;
 }
 
+// Define specific types for each section
+type ContactData = { email: string; phone: string };
+type ExperienceItem = { title: string; company: string; duration: string; description: string };
+type ProjectItem = { name: string; description: string; link: string; github: string; stars: number; technologies: string[] };
+type SkillsData = { skills: string };
+type EducationItem = { school: string; degree: string; field: string; year: string };
+type CertificateItem = { certificate: string; issuer: string; date: string; link: string };
+
+// Union type for all possible form data
+type FormData = 
+  | ContactData 
+  | ExperienceItem[] 
+  | ProjectItem[] 
+  | SkillsData 
+  | EducationItem[] 
+  | CertificateItem[];
+
+// Type guard functions
+const isContactData = (data: FormData): data is ContactData => {
+  return !Array.isArray(data) && 'email' in data;
+};
+
+const isSkillsData = (data: FormData): data is SkillsData => {
+  return !Array.isArray(data) && 'skills' in data;
+};
+
 export function AddSectionModal({ sectionType, onSave, onClose }: AddSectionModalProps) {
-  const [formData, setFormData] = useState(() => {
+  const [formData, setFormData] = useState<FormData>(() => {
     switch (sectionType) {
       case 'contact':
-        return { email: '', phone: '' };
+        return { email: '', phone: '' } as ContactData;
       case 'experience':
-        return [{ title: '', company: '', duration: '', description: '' }];
+        return [{ title: '', company: '', duration: '', description: '' }] as ExperienceItem[];
       case 'projects':
-        return [{ name: '', description: '', link: '', github: '', stars: 0, technologies: [] }];
+        return [{ name: '', description: '', link: '', github: '', stars: 0, technologies: [] }] as ProjectItem[];
       case 'skills':
-        return { skills: '' };
+        return { skills: '' } as SkillsData;
       case 'education':
-        return [{ school: '', degree: '', field: '', year: '' }];
+        return [{ school: '', degree: '', field: '', year: '' }] as EducationItem[];
       case 'certificates':
-        return [{ certificate: '', issuer: '', date: '', link: '' }];
+        return [{ certificate: '', issuer: '', date: '', link: '' }] as CertificateItem[];
       default:
-        return {};
+        return { email: '', phone: '' } as ContactData;
     }
   });
 
-  const handleInputChange = (field: string, value: string, index?: number) => {
+  const handleInputChange = (field: string, value: any, index?: number) => {
     if (Array.isArray(formData)) {
-      const newData = [...formData];
-      newData[index!] = { ...newData[index!], [field]: value };
-      setFormData(newData);
+      const newData = [...formData] as any[];
+      if (index !== undefined) {
+        newData[index] = { ...newData[index], [field]: value };
+      }
+      setFormData(newData as FormData);
     } else {
-      setFormData(prev => ({ ...prev, [field]: value }));
+      setFormData({ ...formData, [field]: value } as FormData);
     }
   };
 
   const addItem = () => {
-    if (Array.isArray(formData)) {
-      switch (sectionType) {
-        case 'experience':
-          setFormData([...formData, { title: '', company: '', duration: '', description: '' }]);
-          break;
-        case 'projects':
-          setFormData([...formData, { name: '', description: '', link: '', github: '', stars: 0, technologies: [] }]);
-          break;
-        case 'education':
-          setFormData([...formData, { school: '', degree: '', field: '', year: '' }]);
-          break;
-        case 'certificates':
-          setFormData([...formData, { certificate: '', issuer: '', date: '', link: '' }]);
-          break;
-      }
+    if (!Array.isArray(formData)) return;
+
+    switch (sectionType) {
+      case 'experience':
+        setFormData([...formData, { title: '', company: '', duration: '', description: '' }] as ExperienceItem[]);
+        break;
+      case 'projects':
+        setFormData([...formData, { name: '', description: '', link: '', github: '', stars: 0, technologies: [] }] as ProjectItem[]);
+        break;
+      case 'education':
+        setFormData([...formData, { school: '', degree: '', field: '', year: '' }] as EducationItem[]);
+        break;
+      case 'certificates':
+        setFormData([...formData, { certificate: '', issuer: '', date: '', link: '' }] as CertificateItem[]);
+        break;
     }
   };
 
   const removeItem = (index: number) => {
     if (Array.isArray(formData)) {
-      setFormData(formData.filter((_, i) => i !== index));
+      setFormData(formData.filter((_, i) => i !== index) as FormData);
     }
   };
 
   const handleSave = () => {
-    if (sectionType === 'skills') {
+    if (sectionType === 'skills' && isSkillsData(formData)) {
       // Convert comma-separated skills to array
-      const skillsArray = (formData as any).skills
+      const skillsArray = formData.skills
         .split(',')
         .map((skill: string) => skill.trim())
         .filter((skill: string) => skill.length > 0);
@@ -102,13 +130,13 @@ export function AddSectionModal({ sectionType, onSave, onClose }: AddSectionModa
           </Button>
         </CardHeader>
         <CardContent className="space-y-6">
-          {sectionType === 'contact' && (
+          {sectionType === 'contact' && isContactData(formData) && (
             <div className="grid gap-4">
               <div>
                 <label className="text-sm font-medium">Email</label>
                 <Input
                   type="email"
-                  value={(formData as any).email || ''}
+                  value={formData.email || ''}
                   onChange={(e) => handleInputChange('email', e.target.value)}
                   placeholder="your.email@example.com"
                 />
@@ -117,7 +145,7 @@ export function AddSectionModal({ sectionType, onSave, onClose }: AddSectionModa
                 <label className="text-sm font-medium">Phone</label>
                 <Input
                   type="tel"
-                  value={(formData as any).phone || ''}
+                  value={formData.phone || ''}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
                   placeholder="+1 (555) 123-4567"
                 />
@@ -127,7 +155,7 @@ export function AddSectionModal({ sectionType, onSave, onClose }: AddSectionModa
 
           {sectionType === 'experience' && Array.isArray(formData) && (
             <div className="space-y-4">
-              {formData.map((exp, index) => (
+              {(formData as ExperienceItem[]).map((exp, index) => (
                 <div key={index} className="p-4 border rounded-lg space-y-3">
                   <div className="flex justify-between items-center">
                     <h4 className="font-medium">Experience {index + 1}</h4>
@@ -195,7 +223,7 @@ export function AddSectionModal({ sectionType, onSave, onClose }: AddSectionModa
 
           {sectionType === 'projects' && Array.isArray(formData) && (
             <div className="space-y-4">
-              {formData.map((project, index) => (
+              {(formData as ProjectItem[]).map((project, index) => (
                 <div key={index} className="p-4 border rounded-lg space-y-3">
                   <div className="flex justify-between items-center">
                     <h4 className="font-medium">Project {index + 1}</h4>
@@ -274,13 +302,13 @@ export function AddSectionModal({ sectionType, onSave, onClose }: AddSectionModa
             </div>
           )}
 
-          {sectionType === 'skills' && (
+          {sectionType === 'skills' && isSkillsData(formData) && (
             <div>
               <label className="text-sm font-medium">Skills (comma-separated)</label>
               <textarea
                 className="w-full p-3 border rounded-md resize-none mt-2"
                 rows={4}
-                value={(formData as any).skills || ''}
+                value={formData.skills || ''}
                 onChange={(e) => handleInputChange('skills', e.target.value)}
                 placeholder="JavaScript, React, Node.js, Python, AWS, Docker..."
               />
@@ -292,7 +320,7 @@ export function AddSectionModal({ sectionType, onSave, onClose }: AddSectionModa
 
           {sectionType === 'education' && Array.isArray(formData) && (
             <div className="space-y-4">
-              {formData.map((edu, index) => (
+              {(formData as EducationItem[]).map((edu, index) => (
                 <div key={index} className="p-4 border rounded-lg space-y-3">
                   <div className="flex justify-between items-center">
                     <h4 className="font-medium">Education {index + 1}</h4>
@@ -356,7 +384,7 @@ export function AddSectionModal({ sectionType, onSave, onClose }: AddSectionModa
 
           {sectionType === 'certificates' && Array.isArray(formData) && (
             <div className="space-y-4">
-              {formData.map((cert, index) => (
+              {(formData as CertificateItem[]).map((cert, index) => (
                 <div key={index} className="p-4 border rounded-lg space-y-3">
                   <div className="flex justify-between items-center">
                     <h4 className="font-medium">Certificate {index + 1}</h4>
