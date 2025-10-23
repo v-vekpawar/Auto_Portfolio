@@ -129,33 +129,139 @@ class OTPHandler:
         try:
             logger.info(f"🔐 Attempting to handle OTP verification for {email}")
             
-            # Wait a bit for the OTP page to load
-            time.sleep(2)
+            # Wait for the OTP page to fully load
+            logger.info("⏳ Waiting for OTP verification page to load...")
             
-            # Try different OTP input selectors (LinkedIn changes these sometimes)
+            # Wait for page to stabilize and load verification elements
+            try:
+                # Wait for any of these elements that indicate OTP page
+                page.wait_for_selector("div.form__content, input[name='pin'], input[validation='pin']", timeout=10000)
+                logger.info("✅ OTP page elements detected")
+            except:
+                logger.warning("⚠️ OTP page elements not detected, proceeding anyway...")
+            
+            time.sleep(2)  # Additional wait for dynamic content
+            
+            # Try different OTP input selectors based on actual LinkedIn HTML
             otp_selectors = [
+                # Most specific selector based on your HTML
+                "input#input__phone_verification_pin",
+                "input[name='pin'][validation='pin']",
+                "input.form__input--text.input_verification_pin",
+                
+                # Fallback selectors
+                "div.form__content input[name='pin']",
                 "input[id='input__phone_verification_pin']",
+                "input[validation='pin']",
                 "input[name='pin']",
-                "input[type='tel']",
-                "input[aria-label='Verification code']",
+                "input[maxlength='6'][type='tel']",
+                "input[pattern*='0-9']",
+                "input[aria-label*='code']",
+                "input[aria-label*='Code']",
+                "input[type='tel'][maxlength='6']",
+                
+                # XPath-style selectors (converted to CSS)
+                "div[class*='form__content'] input[name='pin']",
+                "div[class*='form__content'] input[type='tel']",
+                
+                # Generic fallbacks
                 "input[placeholder*='code']",
                 "input[placeholder*='Code']",
                 "input[id*='verification']",
                 "input[id*='pin']"
             ]
             
+            # First, let's debug what's actually on the page
+            logger.info("🔍 Debugging: Looking for OTP input field...")
+            
+            # Check if we're on the right page
+            page_content = page.content()
+            if "verification" in page_content.lower() or "pin" in page_content.lower():
+                logger.info("✅ Detected verification/PIN page")
+            else:
+                logger.warning("⚠️ May not be on OTP verification page")
+            
+            # Try to find the form__content div first
+            form_content = None
+            try:
+                form_content = page.wait_for_selector("div.form__content", timeout=5000)
+                if form_content:
+                    logger.info("✅ Found form__content div")
+                else:
+                    logger.warning("⚠️ form__content div not found")
+            except:
+                logger.warning("⚠️ form__content div not found")
+            
+            # Now try to find the OTP input
             otp_input = None
-            for selector in otp_selectors:
+            successful_selector = None
+            
+            for i, selector in enumerate(otp_selectors):
                 try:
-                    otp_input = page.wait_for_selector(selector, timeout=3000)
+                    logger.info(f"🔍 Trying selector {i+1}/{len(otp_selectors)}: {selector}")
+                    otp_input = page.wait_for_selector(selector, timeout=2000)
                     if otp_input:
-                        logger.info(f"✅ Found OTP input field: {selector}")
+                        successful_selector = selector
+                        logger.info(f"✅ Found OTP input field with: {selector}")
                         break
-                except:
+                except Exception as e:
+                    logger.debug(f"❌ Selector failed: {selector} - {str(e)}")
                     continue
             
+            # If CSS selectors fail, try XPath
             if not otp_input:
-                logger.warning("❌ Could not find OTP input field")
+                logger.info("🔍 CSS selectors failed, trying XPath...")
+                xpath_selectors = [
+                    "//div[contains(@class, 'form__content')]//input[@name='pin']",
+                    "//input[@id='input__phone_verification_pin']",
+                    "//input[@validation='pin']",
+                    "//input[@name='pin' and @maxlength='6']",
+                    "//input[@type='tel' and @maxlength='6']",
+                    "//input[contains(@class, 'input_verification_pin')]"
+                ]
+                
+                for xpath in xpath_selectors:
+                    try:
+                        logger.info(f"🔍 Trying XPath: {xpath}")
+                        otp_input = page.wait_for_selector(f"xpath={xpath}", timeout=2000)
+                        if otp_input:
+                            successful_selector = f"xpath={xpath}"
+                            logger.info(f"✅ Found OTP input field with XPath: {xpath}")
+                            break
+                    except Exception as e:
+                        logger.debug(f"❌ XPath failed: {xpath} - {str(e)}")
+                        continue
+            
+            if not otp_input:
+                logger.error("❌ Could not find OTP input field with any selector")
+                
+                # Debug: Save page screenshot and HTML for analysis
+                try:
+                    logger.info("📸 Saving debug information...")
+                    page.screenshot(path="debug_otp_page.png")
+                    with open("debug_otp_page.html", "w", encoding="utf-8") as f:
+                        f.write(page.content())
+                    logger.info("💾 Saved debug_otp_page.png and debug_otp_page.html")
+                except:
+                    pass
+                
+                # Try to find any input fields on the page
+                all_inputs = page.query_selector_all("input")
+                logger.info(f"🔍 Found {len(all_inputs)} input fields on page:")
+                for i, inp in enumerate(all_inputs[:10]):  # Show first 10
+                    try:
+                        attrs = {
+                            'id': inp.get_attribute('id'),
+                            'name': inp.get_attribute('name'),
+                            'class': inp.get_attribute('class'),
+                            'type': inp.get_attribute('type'),
+                            'maxlength': inp.get_attribute('maxlength')
+                        }
+                        attrs = {k: v for k, v in attrs.items() if v}  # Remove None values
+                        logger.info(f"  Input {i+1}: {attrs}")
+                    except:
+                        pass
+                
                 return False
             
             # Get OTP code
