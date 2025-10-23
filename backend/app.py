@@ -5,8 +5,9 @@ import json
 import io
 from scraper.linkedin_scraper import LinkedInScraper, scrape_linkedin_profile
 from scraper.github_scraper import GitHubScraper
-from scraper.resume_parser import ResumeParser
+from scraper.ai_resume_parser import AIResumeParser as ResumeParser
 from portfolio_generator import PortfolioGenerator
+from ai_content_generator import force_enhance_portfolio_content
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -133,6 +134,30 @@ def scrape_profile():
         # Combine all data
         portfolio_data = combine_profile_data(linkedin_data, github_data, resume_data)
         
+        # Enhance portfolio content with AI-generated headlines and summaries
+        print("🤖 Enhancing portfolio content with AI...")
+        try:
+            portfolio_data = enhance_portfolio_content(portfolio_data)
+            print("✅ AI content enhancement completed")
+        except Exception as e:
+            print(f"⚠️ AI content enhancement failed: {e}")
+            # Continue without AI enhancement
+        
+        # Debug: Log final portfolio data structure
+        print(f"📊 Final portfolio data:")
+        print(f"  - Name: {portfolio_data.get('name', 'N/A')}")
+        print(f"  - Headline: {portfolio_data.get('headline', 'N/A')[:50]}...")
+        print(f"  - About: {len(portfolio_data.get('about', ''))} characters")
+        print(f"  - Projects: {len(portfolio_data.get('projects', []))}")
+        print(f"  - Certificates: {len(portfolio_data.get('certificates', []))}")
+        print(f"  - Experience: {len(portfolio_data.get('experience', []))}")
+        print(f"  - Skills: {len(portfolio_data.get('skills', []))}")
+        
+        if portfolio_data.get('projects'):
+            print(f"  - Project names: {[p.get('name') for p in portfolio_data['projects']]}")
+        if portfolio_data.get('certificates'):
+            print(f"  - Certificate names: {[c.get('certificate') for c in portfolio_data['certificates']]}")
+        
         return jsonify(portfolio_data)
         
     except Exception as e:
@@ -215,6 +240,36 @@ def combine_profile_data(linkedin_data, github_data, resume_data):
         # Add contact information from resume
         if resume_data.get('contact'):
             portfolio['contact'] = resume_data['contact']
+        
+        # Add projects from resume (merge with GitHub projects)
+        if resume_data.get('projects'):
+            # Convert resume projects to expected format
+            for project in resume_data['projects']:
+                portfolio_project = {
+                    'name': project.get('name', ''),
+                    'description': project.get('description', ''),
+                    'link': project.get('link', ''),
+                    'github': project.get('link', ''),  # Use link as github if available
+                    'stars': 0,  # Resume projects don't have stars
+                    'technologies': project.get('technologies', [])
+                }
+                portfolio['projects'].append(portfolio_project)
+        
+        # Add certifications from resume (merge with LinkedIn certificates)
+        if resume_data.get('certifications'):
+            # Convert resume certifications to expected format
+            for cert in resume_data['certifications']:
+                portfolio_cert = {
+                    'certificate': cert.get('certificate', ''),
+                    'issuer': cert.get('issuer', ''),
+                    'date': cert.get('date', ''),
+                    'link': cert.get('link', '')
+                }
+                portfolio['certificates'].append(portfolio_cert)
+        
+        # Add summary/about from resume if available
+        if resume_data.get('summary') and not portfolio['about']:
+            portfolio['about'] = resume_data['summary']
     
     # Fallback values if still empty
     if not portfolio['name']:
@@ -228,6 +283,66 @@ def combine_profile_data(linkedin_data, github_data, resume_data):
     portfolio['skills'] = list(dict.fromkeys(portfolio['skills']))  # Remove duplicate skills while preserving order
     
     return portfolio
+
+@app.route('/enhance-headline', methods=['POST'])
+def enhance_headline():
+    """Enhance only the headline with AI"""
+    try:
+        data = request.get_json()
+        portfolio_data = data.get('portfolio_data')
+        
+        if not portfolio_data:
+            return jsonify({'error': 'Portfolio data is required'}), 400
+        
+        print("🤖 Enhancing headline with AI...")
+        
+        from ai_content_generator import AIContentGenerator
+        generator = AIContentGenerator()
+        new_headline = generator.generate_headline(portfolio_data)
+        
+        # Create a copy and update only the headline
+        updated_data = portfolio_data.copy()
+        updated_data['headline'] = new_headline
+        
+        return jsonify({
+            'success': True,
+            'new_headline': new_headline,
+            'message': 'Headline enhanced successfully'
+        })
+        
+    except Exception as e:
+        print(f"Error enhancing headline: {str(e)}")
+        return jsonify({'error': f'Failed to enhance headline: {str(e)}'}), 500
+
+@app.route('/enhance-summary', methods=['POST'])
+def enhance_summary():
+    """Enhance only the about/summary with AI"""
+    try:
+        data = request.get_json()
+        portfolio_data = data.get('portfolio_data')
+        
+        if not portfolio_data:
+            return jsonify({'error': 'Portfolio data is required'}), 400
+        
+        print("🤖 Enhancing summary with AI...")
+        
+        from ai_content_generator import AIContentGenerator
+        generator = AIContentGenerator()
+        new_summary = generator.generate_summary(portfolio_data)
+        
+        # Create a copy and update only the summary
+        updated_data = portfolio_data.copy()
+        updated_data['about'] = new_summary
+        
+        return jsonify({
+            'success': True,
+            'new_summary': new_summary,
+            'message': 'Summary enhanced successfully'
+        })
+        
+    except Exception as e:
+        print(f"Error enhancing summary: {str(e)}")
+        return jsonify({'error': f'Failed to enhance summary: {str(e)}'}), 500
 
 @app.route('/download-portfolio', methods=['POST'])
 def download_portfolio():

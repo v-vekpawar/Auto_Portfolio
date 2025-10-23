@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,7 +9,8 @@ import { MissingSections } from './MissingSections';
 import { CustomSectionCreator } from './CustomSectionCreator';
 import { AlertDialog } from '@/components/ui/alert-dialog';
 import { BackendResponse, CustomSection } from '@/lib/types';
-import { Edit, User, Briefcase, Code, GraduationCap, Mail, Phone, Award, Trash2 } from 'lucide-react';
+import { Edit, User, Briefcase, Code, GraduationCap, Mail, Phone, Award, Trash2, Sparkles, Loader2 } from 'lucide-react';
+import { enhanceHeadline, enhanceSummary } from '@/lib/api';
 
 interface DataPreviewProps {
   data: BackendResponse;
@@ -20,11 +21,20 @@ interface ExtendedDataPreviewProps extends DataPreviewProps {
   customSections: CustomSection[];
   onUpdateCustomSections: (sections: CustomSection[]) => void;
   onDeleteSection?: (section: keyof BackendResponse) => void;
+  onDataUpdate?: (newData: BackendResponse) => void;
 }
 
-export function DataPreview({ data, onUpdate, customSections = [], onUpdateCustomSections, onDeleteSection }: ExtendedDataPreviewProps) {
+export function DataPreview({ data, onUpdate, customSections = [], onUpdateCustomSections, onDeleteSection, onDataUpdate }: ExtendedDataPreviewProps) {
   const [editingSection, setEditingSection] = useState<string | null>(null);
   const [deletingSection, setDeletingSection] = useState<keyof BackendResponse | null>(null);
+  const [enhancingHeadline, setEnhancingHeadline] = useState(false);
+  const [enhancingSummary, setEnhancingSummary] = useState(false);
+  const currentDataRef = useRef(data);
+
+  // Keep ref updated with latest data
+  useEffect(() => {
+    currentDataRef.current = data;
+  }, [data]);
 
   const handleEdit = (section: string) => {
     setEditingSection(section);
@@ -64,6 +74,50 @@ export function DataPreview({ data, onUpdate, customSections = [], onUpdateCusto
     }
   };
 
+  const handleEnhanceHeadline = async () => {
+    if (enhancingHeadline) return;
+    
+    setEnhancingHeadline(true);
+    try {
+      const newHeadline = await enhanceHeadline(currentDataRef.current);
+      
+      if (onDataUpdate) {
+        const updatedData = {
+          ...currentDataRef.current,
+          headline: newHeadline
+        };
+        currentDataRef.current = updatedData;
+        onDataUpdate(updatedData);
+      }
+    } catch (error) {
+      console.error('Failed to enhance headline:', error);
+    } finally {
+      setEnhancingHeadline(false);
+    }
+  };
+
+  const handleEnhanceSummary = async () => {
+    if (enhancingSummary) return;
+    
+    setEnhancingSummary(true);
+    try {
+      const newSummary = await enhanceSummary(currentDataRef.current);
+      
+      if (onDataUpdate) {
+        const updatedData = {
+          ...currentDataRef.current,
+          about: newSummary
+        };
+        currentDataRef.current = updatedData;
+        onDataUpdate(updatedData);
+      }
+    } catch (error) {
+      console.error('Failed to enhance summary:', error);
+    } finally {
+      setEnhancingSummary(false);
+    }
+  };
+
   const getSectionDisplayName = (section: keyof BackendResponse) => {
     switch (section) {
       case 'experience': return 'Experience';
@@ -94,17 +148,59 @@ export function DataPreview({ data, onUpdate, customSections = [], onUpdateCusto
           </Button>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
+          <div className="space-y-4">
             <div>
               <label className="text-sm font-medium text-gray-500">Name</label>
               <p className="text-lg font-semibold">{data.name}</p>
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-500">Headline</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium text-gray-500">Headline</label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleEnhanceHeadline}
+                  disabled={enhancingHeadline}
+                  className="h-6 px-2 text-xs text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                >
+                  {enhancingHeadline ? (
+                    <>
+                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                      Enhancing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      Enhance
+                    </>
+                  )}
+                </Button>
+              </div>
               <p className="text-gray-900">{data.headline}</p>
             </div>
             <div>
-              <label className="text-sm font-medium text-gray-500">About</label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-medium text-gray-500">About</label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleEnhanceSummary}
+                  disabled={enhancingSummary}
+                  className="h-6 px-2 text-xs text-purple-600 hover:text-purple-700 hover:bg-purple-50"
+                >
+                  {enhancingSummary ? (
+                    <>
+                      <Loader2 className="h-3 w-3 mr-1 animate-spin" />
+                      Enhancing...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-3 w-3 mr-1" />
+                      Enhance
+                    </>
+                  )}
+                </Button>
+              </div>
               <p className="text-gray-700 leading-relaxed">{data.about}</p>
             </div>
           </div>

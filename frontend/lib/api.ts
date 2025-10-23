@@ -47,6 +47,50 @@ export async function scrapeProfile(
   }
 }
 
+export async function enhanceHeadline(
+  portfolioData: BackendResponse
+): Promise<string> {
+  try {
+    const response = await api.post('/enhance-headline', {
+      portfolio_data: portfolioData
+    });
+    
+    if (!response.data.success) {
+      throw new Error(response.data.error || 'Headline enhancement failed');
+    }
+
+    return response.data.new_headline;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const errorMessage = error.response?.data?.error || 'Failed to enhance headline with AI';
+      throw new Error(errorMessage);
+    }
+    throw new Error('Network error occurred while enhancing headline');
+  }
+}
+
+export async function enhanceSummary(
+  portfolioData: BackendResponse
+): Promise<string> {
+  try {
+    const response = await api.post('/enhance-summary', {
+      portfolio_data: portfolioData
+    });
+    
+    if (!response.data.success) {
+      throw new Error(response.data.error || 'Summary enhancement failed');
+    }
+
+    return response.data.new_summary;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const errorMessage = error.response?.data?.error || 'Failed to enhance summary with AI';
+      throw new Error(errorMessage);
+    }
+    throw new Error('Network error occurred while enhancing summary');
+  }
+}
+
 export async function downloadPortfolio(
   portfolioData: BackendResponse,
   template: string = 'modern'

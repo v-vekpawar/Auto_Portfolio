@@ -6,7 +6,7 @@ AutoPortfolio is a full-stack web application that automatically generates beaut
 
 ## 🎓 Educational Purpose & Platform Compliance
 
-**This project is created purely for educational and learning purposes.** I deeply respect and acknowledge the terms of service and guidelines of LinkedIn, GitHub, and all other platforms integrated within this application. 
+**This project is created purely for educational and learning purposes.** I deeply respect and acknowledge the terms of service and guidelines of LinkedIn, GitHub, and all other platforms integrated within this application.
 
 - **Educational Intent**: This project demonstrates web scraping, API integration, and full-stack development concepts
 - **Platform Respect**: Full compliance with LinkedIn's Terms of Service, robots.txt, and usage guidelines
@@ -18,8 +18,10 @@ AutoPortfolio is a full-stack web application that automatically generates beaut
 ## ✨ Features
 
 - 🔗 **LinkedIn Integration** - Automatically extract profile, experience, skills, and education
+- 🔐 **2FA Authentication** - Secure LinkedIn login with automated TOTP handling using PyOTP
 - 🐙 **GitHub Integration** - Showcase your repositories with live stats
-- 📄 **Resume Parsing** - Upload PDF/DOC/DOCX files for enhanced data extraction
+- 📄 **AI Resume Parsing** - Upload PDF/DOC/DOCX files with Google Gemini AI enhancement
+- 🤖 **AI Content Enhancement** - Generate professional headlines and summaries with individual controls
 - 🎨 **Multiple Templates** - Choose from Minimal, Modern, or Professional designs
 - ✏️ **Live Editing** - Edit any section before generating your portfolio
 - 🧩 **Custom Sections** - Add your own sections (hobbies, awards, etc.)
@@ -29,13 +31,17 @@ AutoPortfolio is a full-stack web application that automatically generates beaut
 ## 🛠️ Tech Stack
 
 ### Backend
+
 - **Python 3.8+** - Core language
 - **Flask** - Web framework
-- **Playwright** - LinkedIn scraping
+- **Playwright** - LinkedIn scraping with 2FA support
+- **PyOTP** - TOTP 2FA authentication
 - **GitHub API** - Repository data
-- **PyPDF2/python-docx** - Resume parsing
+- **Google Gemini AI** - Resume parsing and content generation
+- **PyPDF2/python-docx** - Resume file processing
 
 ### Frontend
+
 - **Next.js 14** - React framework with App Router
 - **TypeScript** - Type safety
 - **Tailwind CSS** - Styling
@@ -55,18 +61,20 @@ Before you begin, ensure you have the following installed:
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/autoportfolio.git
+git clone https://github.com/v-vekpawar/autoportfolio.git
 cd autoportfolio
 ```
 
 ### Step 2: Backend Setup
 
 #### 2.1 Navigate to Backend Directory
+
 ```bash
 cd backend
 ```
 
 #### 2.2 Create Virtual Environment
+
 ```bash
 # Create virtual environment
 python -m venv venv
@@ -79,16 +87,19 @@ source venv/bin/activate
 ```
 
 #### 2.3 Install Python Dependencies
+
 ```bash
 pip install -r requirements.txt
 ```
 
 #### 2.4 Install Playwright Browsers
+
 ```bash
 playwright install
 ```
 
 #### 2.5 Configure Environment Variables
+
 Create a `.env` file in the `backend` directory:
 
 ```bash
@@ -105,8 +116,14 @@ LINKEDIN_HEADLESS=true
 MAX_SCRAPES_PER_ACCOUNT=10
 ACCOUNT_COOLDOWN_HOURS=6
 
+# LinkedIn 2FA Configuration (Optional - for accounts with 2FA enabled)
+LINKEDIN_2FA_SECRET_your_email_at_domain_com=YOUR_TOTP_SECRET_KEY
+
 # GitHub API Configuration (Optional - for higher rate limits)
 GITHUB_TOKEN=your_github_personal_access_token
+
+# Google Gemini AI Configuration (Required for AI features)
+GEMINI_API_KEY=your_gemini_api_key
 
 # Flask Configuration
 FLASK_ENV=development
@@ -120,17 +137,20 @@ SECRET_KEY=your_secret_key_here
 ### Step 3: Frontend Setup
 
 #### 3.1 Navigate to Frontend Directory
+
 ```bash
 # Open new terminal window/tab
 cd frontend
 ```
 
 #### 3.2 Install Node.js Dependencies
+
 ```bash
 npm install
 ```
 
 #### 3.3 Configure Environment Variables
+
 Create a `.env.local` file in the `frontend` directory:
 
 ```bash
@@ -150,6 +170,7 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 You need to run both backend and frontend simultaneously.
 
 #### 4.1 Start the Backend Server
+
 ```bash
 # In the backend directory with activated virtual environment
 cd backend
@@ -157,12 +178,14 @@ python app.py
 ```
 
 You should see:
+
 ```
 * Running on http://localhost:5001
 * Debug mode: on
 ```
 
 #### 4.2 Start the Frontend Development Server
+
 ```bash
 # In a new terminal, navigate to frontend directory
 cd frontend
@@ -170,6 +193,7 @@ npm run dev
 ```
 
 You should see:
+
 ```
 ▲ Next.js 14.0.0
 - Local:        http://localhost:3000
@@ -178,12 +202,14 @@ You should see:
 ### Step 5: Access the Application
 
 Open your browser and navigate to:
+
 - **Frontend Application**: http://localhost:3000
 - **Backend API**: http://localhost:5001
 
 ## 📖 How to Use AutoPortfolio
 
 ### Step 1: Provide Your Data
+
 1. Go to http://localhost:3000
 2. Click "Get Started"
 3. Provide at least one of:
@@ -192,21 +218,26 @@ Open your browser and navigate to:
    - **Resume File** (PDF, DOC, or DOCX format)
 
 ### Step 2: Data Extraction
+
 1. Click "Extract Data"
 2. Wait 30-60 seconds for processing
 3. The system will:
-   - Scrape your LinkedIn profile (if provided)
+   - Scrape your LinkedIn profile with 2FA support (if provided)
    - Fetch GitHub repositories and stats
-   - Parse your resume content
+   - Parse your resume content using AI
+   - Enhance content with AI-generated headlines and summaries
 
 ### Step 3: Review & Edit
+
 1. Review all extracted information
-2. Edit any sections as needed
-3. Add missing information
-4. Create custom sections (awards, hobbies, etc.)
-5. Choose your preferred template design
+2. Use individual "Enhance" buttons for AI-powered headline and summary generation
+3. Edit any sections as needed
+4. Add missing information
+5. Create custom sections (awards, hobbies, etc.)
+6. Choose your preferred template design
 
 ### Step 4: Generate Portfolio
+
 1. Click "Generate Portfolio"
 2. Your portfolio website is created instantly
 3. Share the generated link or download the files
@@ -220,20 +251,24 @@ Open your browser and navigate to:
 ### LinkedIn Terms of Service Compliance
 
 1. **Personal Use Only**
+
    - Use AutoPortfolio only for creating your own personal portfolio
    - Do NOT use it for commercial data harvesting
    - Do NOT scrape other people's profiles without explicit permission
 
 2. **Respect Rate Limits**
+
    - The application includes built-in delays and cooldowns
    - Maximum 10 scrapes per account per day (configurable)
    - 6-hour cooldown between account uses
    - Random delays between requests to avoid detection
 
-3. **Account Security**
+3. **Account Security & 2FA**
+
    - Use dedicated LinkedIn accounts for scraping (not your main account)
+   - 2FA is supported using PyOTP for TOTP authentication
+   - Store credentials and 2FA secrets securely in environment variables
    - Consider using LinkedIn's official API for commercial applications
-   - Store credentials securely in environment variables
 
 4. **Responsible Scraping Practices**
    - Don't overload LinkedIn's servers
@@ -244,6 +279,7 @@ Open your browser and navigate to:
 ### LinkedIn API Alternative
 
 For commercial use or higher volume needs, consider using:
+
 - **LinkedIn Marketing Developer Platform**
 - **LinkedIn Profile API** (requires approval)
 - **LinkedIn Learning API**
@@ -267,6 +303,66 @@ RANDOM_DELAY_MAX=5
 - Always check current LinkedIn Terms of Service before use
 - Consider legal consultation for commercial applications
 
+## 🤖 AI Features
+
+### Google Gemini AI Integration
+
+AutoPortfolio uses Google Gemini AI for intelligent content processing and generation:
+
+#### **AI Resume Parsing**
+
+- **Smart Extraction**: Automatically extracts projects, certifications, experience, and skills from resume files
+- **Multiple Formats**: Supports PDF, DOC, and DOCX files
+- **Structured Output**: Converts unstructured resume text into organized portfolio sections
+- **Fallback Support**: Manual parsing when AI is unavailable
+
+#### **AI Content Enhancement**
+
+- **Professional Headlines**: Generate compelling, industry-specific headlines based on your experience
+- **Personalized Summaries**: Create engaging 3-5 line summaries highlighting your key strengths
+- **Individual Controls**: Enhance headline and summary separately with dedicated buttons
+- **Concurrent Processing**: Both enhancements can run simultaneously without conflicts
+
+#### **Setup Requirements**
+
+1. **Get Gemini API Key**: Visit [Google AI Studio](https://aistudio.google.com/app/api-keys)
+2. **Add to Environment**: Set `GEMINI_API_KEY` in your `.env` file
+3. **Install Dependencies**: `google-generativeai` package (included in requirements.txt)
+
+#### **AI Enhancement Usage**
+
+- **Automatic**: AI enhancement runs during initial data extraction
+- **Manual**: Use individual "Enhance" buttons next to headline and summary sections
+- **Smart Detection**: Only enhances content that needs improvement
+- **Fallback**: Graceful degradation when AI services are unavailable
+
+## 🔐 LinkedIn 2FA Support
+
+### Automated TOTP Authentication
+
+AutoPortfolio supports LinkedIn accounts with Two-Factor Authentication enabled:
+
+#### **Setup Process**
+
+1. **Enable 2FA**: Set up TOTP 2FA on your LinkedIn account
+2. **Get Secret Key**: During setup, save the TOTP secret key (not the QR code)
+3. **Configure Environment**: Add the secret to your `.env` file
+4. **Format**: `LINKEDIN_2FA_SECRET_email_at_domain_com=YOUR_SECRET_KEY`
+
+#### **How It Works**
+
+- **PyOTP Integration**: Uses PyOTP library for TOTP code generation
+- **Automatic Handling**: Generates and enters 2FA codes automatically
+- **Multiple Accounts**: Supports different 2FA secrets for each LinkedIn account
+- **Fallback Support**: Manual 2FA input when automated fails
+
+#### **Security Benefits**
+
+- **Enhanced Security**: Keep your LinkedIn accounts secure with 2FA
+- **Automated Process**: No manual intervention required for 2FA codes
+- **Account Protection**: Reduces risk of account compromise
+- **Compliance**: Maintains LinkedIn's security requirements
+
 ## 🔧 Configuration Options
 
 ### Backend Configuration (.env)
@@ -278,9 +374,15 @@ LINKEDIN_HEADLESS=true                        # Run browser in background
 MAX_SCRAPES_PER_ACCOUNT=10                   # Daily limit per account
 ACCOUNT_COOLDOWN_HOURS=6                     # Hours between account reuse
 
+# LinkedIn 2FA (Optional - for accounts with 2FA enabled)
+LINKEDIN_2FA_SECRET_email_at_domain_com=YOUR_TOTP_SECRET  # TOTP secret key
+
 # GitHub API
-GITHUB_TOKEN=ghp_your_token_here             # Personal access token
+GITHUB_TOKEN=your_github_personal_access_token             # Personal access token
 GITHUB_MAX_REPOS=10                          # Max repositories to fetch
+
+# Google Gemini AI
+GEMINI_API_KEY=your_gemini_api_key           # Required for AI features
 
 # File Upload
 MAX_FILE_SIZE=16777216                       # 16MB file size limit
@@ -306,6 +408,7 @@ NEXT_PUBLIC_MAX_FILE_SIZE=16777216              # File upload limit
 ### Common Backend Issues
 
 #### Python/Pip Issues
+
 ```bash
 # If pip is not found
 python -m ensurepip --upgrade
@@ -315,6 +418,7 @@ python -m venv --clear venv
 ```
 
 #### Playwright Issues
+
 ```bash
 # If browser installation fails
 playwright install --force
@@ -324,12 +428,14 @@ playwright install chromium
 ```
 
 #### LinkedIn Scraping Issues
+
 - **Profile not found**: Ensure LinkedIn URL is public and correct
 - **Login failed**: Check credentials in .env file
 - **Rate limited**: Reduce MAX_SCRAPES_PER_ACCOUNT or increase cooldown
 - **Browser crashes**: Try with LINKEDIN_HEADLESS=false for debugging
 
 #### Port Issues
+
 ```bash
 # If port 5001 is in use (Windows)
 netstat -ano | findstr :5001
@@ -342,6 +448,7 @@ lsof -ti:5001 | xargs kill -9
 ### Common Frontend Issues
 
 #### Node.js/NPM Issues
+
 ```bash
 # Clear npm cache
 npm cache clean --force
@@ -356,6 +463,7 @@ yarn install
 ```
 
 #### Build Issues
+
 ```bash
 # Clear Next.js cache
 rm -rf .next
@@ -365,6 +473,7 @@ npm run build
 ```
 
 #### Connection Issues
+
 - Ensure backend is running on port 5001
 - Check NEXT_PUBLIC_BACKEND_URL in .env.local
 - Verify CORS settings in Flask backend
@@ -377,7 +486,6 @@ npm run build
 3. **Environment Variables**: Double-check all .env configurations
 4. **Port Conflicts**: Make sure ports 3000 and 5001 are available
 5. **GitHub Issues**: Create an issue with detailed error information
-
 
 ## 📁 Project Structure
 
@@ -425,12 +533,14 @@ autoportfolio/
 AutoPortfolio is released under a **Custom Proprietary License** that provides specific usage rights while maintaining control over distribution and modifications.
 
 ### What You CAN Do:
+
 - ✅ Use the software for personal or educational purposes
 - ✅ Run and execute the software on your local systems
 - ✅ Make modifications for your own personal use
 - ✅ Create portfolios using the application
 
 ### What You CANNOT Do:
+
 - ❌ Distribute or share the original code or modified versions
 - ❌ Copy code to other projects or repositories
 - ❌ Upload modified versions to public repositories without approval
@@ -438,25 +548,18 @@ AutoPortfolio is released under a **Custom Proprietary License** that provides s
 - ❌ Sublicense or sell the software
 
 ### Contribution Process:
+
 1. **Local Development**: Make modifications on your local machine only
 2. **Submit Pull Request**: Propose changes via GitHub pull requests
 3. **Wait for Approval**: Only approved changes can be pushed to the repository
 4. **No Unauthorized Distribution**: Modified versions must stay local until approved
 
 ### Legal Responsibility:
+
 - **User Liability**: You are fully responsible for compliance with all laws and platform terms
 - **LinkedIn Compliance**: You must follow LinkedIn's Terms of Service
 - **No Author Liability**: The author is not responsible for any misuse or legal issues
 - **Indemnification**: Users agree to protect the author from legal claims
-
-### Why This License?
-
-This custom license allows:
-1. **Controlled Distribution**: Prevents unauthorized copying and sharing
-2. **Quality Control**: Ensures all public modifications are approved
-3. **Legal Protection**: Shields the author from liability
-4. **Usage Freedom**: Still allows personal and commercial use
-5. **Contribution Management**: Maintains organized development process
 
 ## 🤝 Contributing
 
@@ -498,13 +601,13 @@ We welcome contributions! Please follow these steps:
 
 - **GitHub Issues**: [Create an issue](https://github.com/v-vekpawar/autoportfolio/issues)
 - **Documentation**: Check SETUP_GUIDE.md for detailed instructions
-- **Email**: contact.vivekpawar@gmail.com (replace with your contact)
+- **Email**: contact.vivekpawar@gmail.com 
 
 ---
 
 **Built with ❤️ for the developer community**
 
-*If AutoPortfolio helped you create an amazing portfolio, please give it a ⭐ on GitHub and share it with others!*
+_If AutoPortfolio helped you create an amazing portfolio, please give it a ⭐ on GitHub and share it with others!_
 
 ## 🔄 Version History
 
@@ -514,4 +617,4 @@ We welcome contributions! Please follow these steps:
 
 ---
 
-*Last updated: October 2025*
+_Last updated: October 2025_

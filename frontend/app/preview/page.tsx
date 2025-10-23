@@ -5,11 +5,10 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { DataPreview } from '@/components/preview/DataPreview';
 import { TemplateSelector } from '@/components/preview/TemplateSelector';
-import DownloadButton from '@/components/ui/DownloadButton';
 import AutoPortfolioLogo from '@/components/ui/AutoPortfolioLogo';
 import { usePortfolioStore } from '@/store/portfolioStore';
 import { generatePortfolioId } from '@/lib/utils';
-import { ArrowLeft, ArrowRight, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 
@@ -23,6 +22,7 @@ export default function PreviewPage() {
     selectTemplate,
     setPortfolioId,
     setCustomSections,
+    setScrapedData,
   } = usePortfolioStore();
   const router = useRouter();
 
@@ -89,6 +89,7 @@ export default function PreviewPage() {
               onDeleteSection={deleteSection}
               customSections={customSections}
               onUpdateCustomSections={setCustomSections}
+              onDataUpdate={setScrapedData}
             />
           </motion.div>
 
@@ -105,7 +106,7 @@ export default function PreviewPage() {
                 onSelect={selectTemplate}
               />
 
-              <div className="mt-8 pt-6 border-t space-y-4">
+              <div className="mt-6 pt-4 border-t space-y-4">
                 <Button
                   onClick={handleGeneratePortfolio}
                   className="w-full"
@@ -117,19 +118,6 @@ export default function PreviewPage() {
                 <p className="text-xs text-gray-500 text-center">
                   This will create your live portfolio page
                 </p>
-                
-                <div className="pt-4 border-t">
-                  <DownloadButton
-                    portfolioData={scrapedData}
-                    template={selectedTemplate}
-                    className="w-full"
-                    variant="outline"
-                    size="lg"
-                  />
-                  <p className="text-xs text-gray-500 text-center mt-2">
-                    Download as standalone website files
-                  </p>
-                </div>
               </div>
             </div>
           </motion.div>

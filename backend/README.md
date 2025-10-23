@@ -1,415 +1,354 @@
 # AutoPortfolio Backend
 
-A Flask-based backend service that automatically scrapes LinkedIn profiles, GitHub repositories, and parses resume files to generate comprehensive portfolio data.
+Flask-based backend API for AutoPortfolio with advanced LinkedIn scraping, AI-powered resume parsing, and intelligent content generation.
 
-## 🎓 Educational Purpose & Compliance
+## 🎓 Educational Purpose & Platform Compliance
 
-**This backend is created for educational and learning purposes.** It demonstrates web scraping, API integration, and data processing techniques while respecting platform guidelines and terms of service.
+**This backend is created purely for educational and learning purposes.** We deeply respect and acknowledge the terms of service and guidelines of LinkedIn, GitHub, Google AI, and all other platforms integrated within this application.
 
-- **Educational Focus**: Learn web scraping, API design, and data extraction
-- **Platform Compliance**: Respects LinkedIn's Terms of Service and robots.txt
-- **Responsible Usage**: Implements rate limiting and ethical scraping practices
-- **Learning Resource**: Understand modern backend development patterns
+### **Educational Intent**
+- **Learning Resource**: Demonstrates advanced web scraping techniques and API integration
+- **Technology Showcase**: Shows modern backend development with AI integration
+- **Best Practices**: Illustrates responsible data extraction and ethical scraping practices
+- **Automation Education**: Teaches browser automation and 2FA handling
 
-## 🏗️ Architecture Overview
+### **Platform Respect & Compliance**
+- **LinkedIn Terms**: Full compliance with LinkedIn's Terms of Service, robots.txt, and usage guidelines
+- **GitHub API**: Respects GitHub's API terms, rate limiting, and attribution requirements
+- **Google Gemini AI**: Follows Google AI usage policies and best practices
+- **Responsible Usage**: Encourages ethical data extraction practices and rate limiting
 
-```
-backend/
-├── app.py                      # Main Flask application
-├── config.py                   # Configuration settings
-├── requirements.txt            # Python dependencies
-├── Dockerfile                  # Docker configuration
-├── scraper/                    # Scraping modules
-│   ├── linkedin_scraper.py     # LinkedIn profile scraper
-│   ├── github_scraper.py       # GitHub API integration
-│   └── resume_parser.py        # Resume file parser
-├── cookies/                    # LinkedIn session management
-│   ├── account_state.json      # Account usage tracking
-│   └── playwright_user_data/   # Browser session data
-└── uploads/                    # Temporary resume storage
-```
+### **Legal Responsibility**
+**Users are expected to use this backend responsibly and in compliance with all applicable platform terms and legal requirements. The backend includes built-in safeguards and rate limiting to promote responsible usage.**
 
-## 🔧 Core Components
+## 🚀 Features
 
-### 1. Main Application (`app.py`)
+### **LinkedIn Integration with 2FA Support**
+- **Account Rotation**: Multiple LinkedIn accounts with automatic switching
+- **2FA Authentication**: Automated TOTP handling using PyOTP
+- **Rate Limiting**: Built-in cooldowns and request limits
+- **Security Checkpoints**: Handles LinkedIn security challenges
+- **Headless Operation**: Browser automation with Playwright
 
-**Flask Routes:**
-- `GET /` - Health check endpoint
-- `POST /scrape` - Main scraping endpoint that combines all data sources
+### **AI-Powered Resume Processing**
+- **Google Gemini Integration**: Advanced AI parsing using Gemini 2.5 Flash
+- **Multi-Format Support**: PDF, DOC, DOCX file processing
+- **Intelligent Extraction**: Projects, certifications, experience, skills
+- **Structured Output**: Converts unstructured text to organized data
+- **Fallback Parsing**: Manual extraction when AI unavailable
 
-**Key Functions:**
-- `scrape_profile()` - Orchestrates the complete scraping process
-- `combine_profile_data()` - Merges data from LinkedIn, GitHub, and resume sources
+### **AI Content Enhancement**
+- **Professional Headlines**: Generate industry-specific, compelling headlines
+- **Personalized Summaries**: Create engaging 3-5 line professional summaries
+- **Individual Endpoints**: Separate APIs for headline and summary enhancement
+- **Concurrent Processing**: Handle multiple enhancement requests simultaneously
+- **Smart Generation**: Context-aware content based on user's complete profile
 
-### 2. LinkedIn Scraper (`scraper/linkedin_scraper.py`)
+### **GitHub Integration**
+- **Repository Data**: Fetch public repositories with statistics
+- **API Integration**: Uses GitHub REST API with optional authentication
+- **Rate Limiting**: Respects GitHub API limits
+- **Project Showcase**: Extracts technologies, descriptions, and metrics
 
-**Features:**
-- **Playwright-based scraping** with realistic browser behavior
-- **Account rotation system** to avoid rate limits
-- **Persistent session management** with cookie storage
-- **Anti-detection measures** with random delays and human-like interactions
+## 🛠️ Tech Stack
 
-**Key Methods:**
-```python
-class LinkedInScraper:
-    def scrape_profile(profile_url)          # Main scraping method
-    def _extract_name()                      # Extract user's name
-    def _extract_headline()                  # Extract professional headline
-    def _extract_about()                     # Extract about section
-    def _extract_experience()                # Extract work experience
-    def _extract_skills()                    # Extract skills list
-    def _extract_education()                 # Extract education info
-```
+- **Python 3.8+** - Core language
+- **Flask** - Web framework with CORS support
+- **Playwright** - Browser automation for LinkedIn scraping
+- **PyOTP** - TOTP 2FA code generation
+- **Google Gemini AI** - Advanced AI processing
+- **PyPDF2** - PDF text extraction
+- **python-docx** - Word document processing
+- **APScheduler** - Background task scheduling
+- **Jinja2** - Template rendering for portfolio generation
 
-**Account Management:**
-- Supports multiple LinkedIn accounts for rotation
-- Tracks usage per account to prevent overuse
-- Automatic cooldown periods between scrapes
-- Session persistence across restarts
+## 📋 Prerequisites
 
-### 3. GitHub Scraper (`scraper/github_scraper.py`)
+- Python 3.8 or higher
+- Google Gemini API key (for AI features)
+- LinkedIn accounts (optional, for LinkedIn scraping)
+- GitHub token (optional, for higher rate limits)
 
-**Features:**
-- **GitHub REST API integration** for reliable data access
-- **Repository analysis** with metadata extraction
-- **Rate limit handling** with optional authentication token
+## 🚀 Installation
 
-**Key Methods:**
-```python
-class GitHubScraper:
-    def scrape_profile(github_url)           # Main scraping method
-    def _get_user_profile(username)          # Get user profile data
-    def _get_repositories(username)          # Get user repositories
-    def _extract_username(github_url)        # Extract username from URL
-```
-
-### 4. Resume Parser (`scraper/resume_parser.py`)
-
-**Supported Formats:**
-- PDF files (using PyPDF2)
-- DOCX files (using python-docx)
-
-**Extraction Capabilities:**
-- Contact information (email, phone)
-- Work experience with dates and descriptions
-- Skills and technologies
-- Education background
-
-**Key Methods:**
-```python
-class ResumeParser:
-    def parse_resume(file_path)              # Main parsing method
-    def _extract_pdf_text(file_path)         # PDF text extraction
-    def _extract_docx_text(file_path)        # DOCX text extraction
-    def _extract_contact_info(text)          # Contact info extraction
-    def _extract_experience(text)            # Experience extraction
-    def _extract_skills(text)                # Skills extraction
-```
-
-## 📊 Data Structures
-
-### Input Data Structure
-
-**Request Format:**
-```json
-{
-  "linkedin_url": "https://linkedin.com/in/username",
-  "github_url": "https://github.com/username",
-  "resume_file": "file_upload_object"
-}
-```
-
-### LinkedIn Data Structure
-
-```json
-{
-  "name": "John Doe",
-  "headline": "Senior Software Engineer at Tech Company",
-  "about": "Passionate developer with 5+ years of experience...",
-  "experience": [
-    {
-      "title": "Senior Software Engineer",
-      "company": "Tech Company",
-      "duration": "Jan 2020 - Present",
-      "description": "Led development of microservices architecture..."
-    }
-  ],
-  "skills": [
-    "JavaScript", "Python", "React", "Node.js", "AWS"
-  ],
-  "education": [
-    {
-      "school": "University Name",
-      "degree": "Bachelor of Science",
-      "field": "Computer Science",
-      "year": "2018"
-    }
-  ],
-  "certifcates": [
-    {
-      certificate': "Data Analytics Certificate",
-      'link': "https://example.com/certificate1",
-      'issuer': "AutoPortfolio Academy",
-      'date': "Jan 2023"
-    }
-  ]
-}
-```
-
-### GitHub Data Structure
-
-```json
-{
-  "profile": {
-    "login": "username",
-    "name": "John Doe",
-    "bio": "Full-stack developer",
-    "html_url": "https://github.com/username",
-    "public_repos": 25,
-    "followers": 150,
-    "following": 75
-  },
-  "repositories": [
-    {
-      "name": "awesome-project",
-      "description": "A modern web application built with React",
-      "html_url": "https://github.com/username/awesome-project",
-      "homepage": "https://awesome-project.com",
-      "stargazers_count": 45,
-      "forks_count": 12,
-      "language": "JavaScript",
-      "topics": ["react", "nodejs", "mongodb"],
-      "created_at": "2023-01-15T10:30:00Z",
-      "updated_at": "2023-10-20T14:45:00Z"
-    }
-  ]
-}
-```
-
-### Resume Data Structure
-
-```json
-{
-  "contact": {
-    "email": "john.doe@email.com",
-    "phone": "+1 (555) 123-4567"
-  },
-  "experience": [
-    {
-      "title": "Software Engineer",
-      "company": "Previous Company",
-      "duration": "2018 - 2020",
-      "description": "Developed web applications using modern frameworks"
-    }
-  ],
-  "skills": [
-    "Python", "Django", "PostgreSQL", "Docker"
-  ],
-  "education": [
-    {
-      "institution": "University Name",
-      "degree": "Master of Science",
-      "field": "Software Engineering",
-      "year": "2018"
-    }
-  ]
-}
-```
-
-### Combined Output Structure
-
-```json
-{
-  "name": "John Doe",
-  "headline": "Senior Software Engineer at Tech Company",
-  "about": "Passionate developer with 5+ years of experience...",
-  "experience": [
-    // Combined from LinkedIn and resume, deduplicated
-  ],
-  "skills": [
-    // Combined from all sources, deduplicated
-  ],
-  "projects": [
-    // Transformed from GitHub repositories
-    {
-      "name": "awesome-project",
-      "description": "A modern web application built with React",
-      "link": "https://awesome-project.com",
-      "github": "https://github.com/username/awesome-project",
-      "stars": 45,
-      "technologies": ["react", "nodejs", "mongodb"]
-    }
-  ],
-  "education": [
-    // Combined from LinkedIn and resume
-  ]
-}
-```
-
-## 🔄 Data Flow
-
-1. **Request Processing**
-   - Receive LinkedIn URL, GitHub URL, and optional resume file
-   - Validate input parameters
-   - Store resume file temporarily
-
-2. **LinkedIn Scraping**
-   - Initialize Playwright browser with account rotation
-   - Navigate to LinkedIn profile with anti-detection measures
-   - Extract profile information using CSS selectors
-   - Handle dynamic content loading and pagination
-
-3. **GitHub Data Fetching**
-   - Extract username from GitHub URL
-   - Make authenticated API requests to GitHub
-   - Fetch user profile and repository data
-   - Sort repositories by popularity (stars)
-
-4. **Resume Processing**
-   - Parse uploaded file (PDF/DOCX)
-   - Extract text content using appropriate libraries
-   - Use regex patterns to identify sections
-   - Extract structured data from unstructured text
-
-5. **Data Combination**
-   - Merge data from all sources
-   - Deduplicate skills and experience entries
-   - Transform GitHub repositories into project format
-   - Prioritize data quality (resume > LinkedIn > GitHub)
-
-6. **Response Generation**
-   - Return combined portfolio data as JSON
-   - Clean up temporary files
-   - Log scraping statistics
-
-## 🛡️ Anti-Detection Features
-
-### LinkedIn Scraping Protection
-- **Human-like behavior**: Random delays between actions
-- **Browser fingerprinting**: Realistic user agent and viewport
-- **Session persistence**: Maintain login state across requests
-- **Account rotation**: Distribute load across multiple accounts
-- **Rate limiting**: Respect platform limits with cooldown periods
-
-### Error Handling
-- **Graceful degradation**: Return partial data if some sources fail
-- **Retry mechanisms**: Automatic retry with exponential backoff
-- **Fallback data**: Dummy data when scraping fails completely
-- **Comprehensive logging**: Detailed error tracking and debugging
-
-## 🚀 Deployment
-
-### Environment Variables (.env)
+### 1. Clone and Setup
 ```bash
-# LinkedIn Account Credentials (Use dedicated accounts, not personal)
-LINKEDIN_ACCOUNTS=account1@example.com:password1,account2@example.com:password2
+cd backend
+python -m venv venv
 
-# LinkedIn Configuration
-LINKEDIN_HEADLESS=true
-MAX_SCRAPES_PER_ACCOUNT=10
-ACCOUNT_COOLDOWN_HOURS=6
+# Activate virtual environment
+# Windows:
+venv\Scripts\activate
+# macOS/Linux:
+source venv/bin/activate
 
-# GitHub API (Optional - for higher rate limits)
-GITHUB_TOKEN=your_github_personal_access_token
-
-# Flask Configuration
-FLASK_ENV=development
-FLASK_DEBUG=true
-FLASK_PORT=5001
-
-# Security
-SECRET_KEY=your_secret_key_here
-```
-
-### Docker Deployment
-```bash
-# Build image
-docker build -t autoportfolio-backend .
-
-# Run container
-docker run -p 5001:5001 \
-  -e LINKEDIN_EMAIL_1=your_email \
-  -e LINKEDIN_PASSWORD_1=your_password \
-  autoportfolio-backend
-```
-
-### Local Development
-```bash
 # Install dependencies
 pip install -r requirements.txt
 
 # Install Playwright browsers
 playwright install
+```
 
-# Run development server
+### 2. Environment Configuration
+
+Create `.env` file:
+
+```env
+# LinkedIn Configuration
+LINKEDIN_ACCOUNTS=email1@example.com:password1,email2@example.com:password2
+LINKEDIN_HEADLESS=true
+MAX_SCRAPES_PER_ACCOUNT=10
+ACCOUNT_COOLDOWN_HOURS=6
+
+# LinkedIn 2FA (Optional)
+LINKEDIN_2FA_SECRET_email1_at_example_com=YOUR_TOTP_SECRET_KEY
+LINKEDIN_2FA_SECRET_email2_at_example_com=YOUR_TOTP_SECRET_KEY
+
+# Google Gemini AI (Required for AI features)
+GEMINI_API_KEY=your_gemini_api_key
+
+# GitHub API (Optional)
+GITHUB_TOKEN=your_github_token
+
+# Flask Configuration
+FLASK_ENV=development
+FLASK_DEBUG=true
+PORT=5001
+SECRET_KEY=your_secret_key
+```
+
+### 3. Run the Server
+```bash
 python app.py
 ```
 
-## 📝 API Usage Examples
+Server will start on `http://localhost:5001`
 
-### Basic Scraping Request
-```bash
-curl -X POST http://localhost:5001/scrape \
-  -F "linkedin_url=https://linkedin.com/in/johndoe" \
-  -F "github_url=https://github.com/johndoe" \
-  -F "resume_file=@resume.pdf"
+## 🔗 API Endpoints
+
+### **Data Extraction**
+```http
+POST /scrape
+Content-Type: multipart/form-data
+
+Form Data:
+- linkedin_url: LinkedIn profile URL (optional)
+- github_url: GitHub profile URL (optional)  
+- resume_file: Resume file (PDF/DOC/DOCX) (optional)
 ```
 
-### Health Check
-```bash
-curl http://localhost:5001/
+### **AI Content Enhancement**
+```http
+POST /enhance-headline
+Content-Type: application/json
+
+{
+  "portfolio_data": {
+    "name": "John Doe",
+    "experience": [...],
+    "skills": [...],
+    // ... other portfolio data
+  }
+}
+
+Response:
+{
+  "success": true,
+  "new_headline": "Generated professional headline",
+  "message": "Headline enhanced successfully"
+}
 ```
 
-## ⚠️ Important Notes
+```http
+POST /enhance-summary
+Content-Type: application/json
 
-### Rate Limits
-- **LinkedIn**: 10 scrapes per account per day (configurable)
-- **GitHub**: 60 requests per hour (unauthenticated), 5000 with token
-- **Resume**: No limits (local processing)
+{
+  "portfolio_data": {
+    "name": "John Doe",
+    "experience": [...],
+    "skills": [...],
+    // ... other portfolio data
+  }
+}
 
-### Data Privacy
-- Resume files are deleted immediately after processing
-- LinkedIn session data is stored locally for performance
-- No user data is permanently stored or transmitted to third parties
+Response:
+{
+  "success": true,
+  "new_summary": "Generated professional summary...",
+  "message": "Summary enhanced successfully"
+}
+```
 
-### Legal Considerations & Compliance
+### **Portfolio Generation**
+```http
+POST /download-portfolio
+Content-Type: application/json
 
-**⚠️ IMPORTANT: LinkedIn Terms of Service Compliance**
+{
+  "portfolio_data": {...},
+  "template": "modern"
+}
 
-- **Educational Use Only**: This backend is for learning and educational purposes
-- **Respect Platform Terms**: Full compliance with LinkedIn's Terms of Service and robots.txt
-- **Personal Profiles Only**: Only scrape your own profile or with explicit permission
-- **Rate Limiting**: Implements responsible scraping with delays and cooldowns
-- **Public Data Only**: Only accesses publicly available information
-- **No Commercial Use**: Not intended for commercial data harvesting
-- **User Responsibility**: Users must ensure compliance with all applicable terms and laws
+Response: ZIP file download
+```
 
-**Recommended Practices:**
-- Use dedicated LinkedIn accounts (not your main account)
-- Keep MAX_SCRAPES_PER_ACCOUNT low (5-10 per day)
-- Increase ACCOUNT_COOLDOWN_HOURS for safer usage
-- Consider LinkedIn's official API for commercial applications
-- Always check current platform terms before use
+## 🔐 LinkedIn 2FA Setup
+
+### 1. Enable 2FA on LinkedIn
+1. Go to LinkedIn Settings & Privacy
+2. Navigate to "Sign in & security"
+3. Enable "Two-step verification"
+4. Choose "Authenticator app"
+
+### 2. Get TOTP Secret
+During setup, LinkedIn will show:
+- QR code (ignore this)
+- **Text key/secret** (copy this)
+
+### 3. Configure Environment
+```env
+# Format: LINKEDIN_2FA_SECRET_{email_with_underscores}
+LINKEDIN_2FA_SECRET_your_email_at_domain_com=YOUR_TOTP_SECRET_KEY
+```
+
+### 4. How It Works
+- PyOTP generates TOTP codes automatically
+- Codes are entered during LinkedIn login
+- No manual intervention required
+- Supports multiple accounts with different secrets
+
+## 🤖 AI Configuration
+
+### Google Gemini Setup
+
+1. **Get API Key**:
+   - Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+   - Create new API key
+   - Copy the key
+
+2. **Configure Environment**:
+   ```env
+   GEMINI_API_KEY=your_api_key_here
+   ```
+
+3. **AI Features**:
+   - **Resume Parsing**: Extracts structured data from resume files
+   - **Headline Generation**: Creates professional headlines based on experience
+   - **Summary Generation**: Writes engaging 3-5 line summaries
+   - **Fallback Support**: Graceful degradation when AI unavailable
+
+### AI Processing Flow
+
+1. **Resume Upload** → AI extracts projects, skills, experience
+2. **Data Combination** → Merges LinkedIn, GitHub, and resume data
+3. **Content Enhancement** → Generates professional headlines and summaries
+4. **Individual Enhancement** → Users can enhance specific sections
+
+## 📁 Project Structure
+
+```
+backend/
+├── scraper/
+│   ├── __init__.py
+│   ├── linkedin_scraper.py      # LinkedIn automation with 2FA
+│   ├── github_scraper.py        # GitHub API integration
+│   ├── ai_resume_parser.py      # AI-powered resume parsing
+│   └── otp_handler.py          # 2FA TOTP handling
+├── templates/                   # Portfolio HTML templates
+├── static/                     # Static assets
+├── ai_content_generator.py     # AI headline/summary generation
+├── portfolio_generator.py     # Portfolio HTML generation
+├── config.py                   # Configuration management
+├── app.py                      # Main Flask application
+├── requirements.txt            # Python dependencies
+├── Dockerfile                  # Docker configuration
+└── .env                       # Environment variables
+```
 
 ## 🔧 Configuration Options
 
-### LinkedIn Scraper Settings (`config.py`)
-```python
-SELENIUM_TIMEOUT = 10              # Element wait timeout
-LINKEDIN_HEADLESS = True           # Run browser in headless mode
-LINKEDIN_COOKIE_EXPIRY = 30        # Cookie expiration in days
+### LinkedIn Scraping
+```env
+LINKEDIN_ACCOUNTS=email1:pass1,email2:pass2
+LINKEDIN_HEADLESS=true
+MAX_SCRAPES_PER_ACCOUNT=10
+ACCOUNT_COOLDOWN_HOURS=6
+LINKEDIN_MANUAL_MODE=false
 ```
 
-### GitHub API Settings
-```python
-GITHUB_API_TIMEOUT = 10            # API request timeout
-GITHUB_MAX_REPOS = 10              # Maximum repositories to fetch
+### AI Configuration
+```env
+GEMINI_API_KEY=your_key
+# AI will fallback to manual parsing if key is missing
 ```
 
-### File Upload Settings
-```python
-MAX_FILE_SIZE = 16 * 1024 * 1024   # 16MB maximum file size
-ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx'}
+### File Upload
+```env
+MAX_FILE_SIZE=16777216          # 16MB limit
+ALLOWED_EXTENSIONS=pdf,doc,docx
 ```
 
-This backend provides a robust foundation for automated portfolio data collection with enterprise-grade reliability and anti-detection capabilities.
+## 🐛 Troubleshooting
+
+### LinkedIn Issues
+- **Login Failed**: Check credentials in LINKEDIN_ACCOUNTS
+- **2FA Failed**: Verify TOTP secret key format
+- **Rate Limited**: Increase ACCOUNT_COOLDOWN_HOURS
+- **Browser Crashes**: Try LINKEDIN_HEADLESS=false for debugging
+
+### AI Issues
+- **Parsing Failed**: Check GEMINI_API_KEY validity
+- **Quota Exceeded**: Monitor Gemini API usage limits
+- **Empty Results**: AI will fallback to manual parsing
+
+### General Issues
+- **Port Conflicts**: Change PORT in .env file
+- **Dependencies**: Reinstall with `pip install -r requirements.txt`
+- **Playwright**: Run `playwright install` for browser setup
+
+## 📄 License
+
+Custom Proprietary License - See main project LICENSE file.
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create feature branch
+3. Make changes to backend only
+4. Test thoroughly
+5. Submit pull request
+
+## ⚖️ Legal & Ethical Guidelines
+
+### **LinkedIn Scraping Compliance**
+
+**Please read and comply with LinkedIn's Terms of Service before using the scraping functionality.**
+
+#### **Responsible Usage Guidelines**
+1. **Personal Use Only**: Use only for creating your own personal portfolio
+2. **Respect Rate Limits**: Built-in delays and cooldowns prevent server overload
+3. **Account Security**: Use dedicated accounts with 2FA for enhanced security
+4. **Ethical Practices**: Don't overload servers or violate platform guidelines
+
+#### **Built-in Safeguards**
+- **Rate Limiting**: Maximum 10 scrapes per account per day
+- **Cooldown Periods**: 6-hour cooldown between account uses
+- **Random Delays**: Prevents detection and reduces server load
+- **Circuit Breakers**: Automatic stopping when issues detected
+
+### **AI Usage Compliance**
+- **Google Gemini**: Follows Google AI usage policies and content guidelines
+- **Data Privacy**: Processes data locally, doesn't store personal information
+- **Ethical AI**: Uses AI for content enhancement, not manipulation
+
+## 🔒 Security Notes
+
+- Store credentials securely in .env file
+- Use dedicated LinkedIn accounts for scraping
+- Keep 2FA secrets confidential
+- Monitor API usage and rate limits
+- Follow all platform Terms of Service
+- Use HTTPS in production environments
+- Implement proper input validation
+- Regular security audits and updates

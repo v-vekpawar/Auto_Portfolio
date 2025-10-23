@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -34,8 +34,20 @@ type FormData = z.infer<typeof formSchema>;
 
 export function InputForm() {
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [currentFormData, setCurrentFormData] = useState<FormData | null>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
   const { setFormData, setScrapedData, setLoading, setError, isLoading, error } = usePortfolioStore();
   const router = useRouter();
+
+  // Cleanup loading state when component unmounts (navigation happens)
+  useEffect(() => {
+    return () => {
+      if (isNavigating) {
+        setLoading(false);
+        setCurrentFormData(null);
+      }
+    };
+  }, [isNavigating, setLoading]);
 
   const {
     register,
@@ -56,6 +68,9 @@ export function InputForm() {
         return;
       }
 
+      // Store current form data for loading state
+      setCurrentFormData(data);
+
       // Store form data
       setFormData({
         linkedin_url: data.linkedin_url || '',
@@ -71,16 +86,28 @@ export function InputForm() {
       );
 
       setScrapedData(result);
+      setIsNavigating(true);
       router.push('/preview');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
       setLoading(false);
+      setCurrentFormData(null);
     }
   };
 
-  if (isLoading) {
-    return <LoadingState />;
+  if (isLoading || isNavigating) {
+    // Determine what data sources are being processed
+    const hasLinkedIn = Boolean(currentFormData?.linkedin_url);
+    const hasGitHub = Boolean(currentFormData?.github_url);
+    const hasResume = Boolean(resumeFile);
+    
+    return (
+      <LoadingState 
+        hasLinkedIn={hasLinkedIn}
+        hasGitHub={hasGitHub}
+        hasResume={hasResume}
+      />
+    );
   }
 
   return (

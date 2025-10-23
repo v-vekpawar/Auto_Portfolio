@@ -4,13 +4,48 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Linkedin, Github, FileText, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export function LoadingState() {
-  const steps = [
-    { icon: Linkedin, label: 'Scraping LinkedIn profile...', delay: 0 },
-    { icon: Github, label: 'Fetching GitHub repositories...', delay: 1 },
-    { icon: FileText, label: 'Processing resume data...', delay: 2 },
-    { icon: Sparkles, label: 'Generating portfolio...', delay: 3 },
+interface LoadingStateProps {
+  hasLinkedIn?: boolean;
+  hasGitHub?: boolean;
+  hasResume?: boolean;
+}
+
+export function LoadingState({ hasLinkedIn = false, hasGitHub = false, hasResume = false }: LoadingStateProps) {
+  // Build dynamic steps based on what data sources are provided
+  const allSteps = [
+    {
+      icon: Linkedin,
+      label: 'Scraping LinkedIn profile...',
+      condition: hasLinkedIn,
+      key: 'linkedin'
+    },
+    {
+      icon: Github,
+      label: 'Fetching GitHub repositories...',
+      condition: hasGitHub,
+      key: 'github'
+    },
+    {
+      icon: FileText,
+      label: 'Processing resume data...',
+      condition: hasResume,
+      key: 'resume'
+    },
+    {
+      icon: Sparkles,
+      label: 'Getting your data please be patient...',
+      condition: true, // Always show AI enhancement
+      key: 'ai'
+    },
   ];
+
+  // Filter steps based on conditions and add delays
+  const steps = allSteps
+    .filter(step => step.condition)
+    .map((step, index) => ({
+      ...step,
+      delay: index
+    }));
 
   return (
     <div className="max-w-2xl mx-auto">
@@ -56,7 +91,7 @@ export function LoadingState() {
 
           <div className="mt-8 p-4 bg-blue-50 rounded-lg">
             <p className="text-sm text-blue-800 text-center">
-              <strong>Tip:</strong> This process may take 30-60 seconds depending on the amount of data to process.
+              <strong>Tip:</strong> This process may take {steps.length > 2 ? '30-60' : '15-30'} seconds depending on the amount of data to process.
             </p>
           </div>
         </CardContent>
