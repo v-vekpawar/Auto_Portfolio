@@ -12,7 +12,7 @@ from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeo
 import sys
 import os
 from dotenv import load_dotenv
-
+from .otp_handler import OTPHandler
 load_dotenv()
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -39,6 +39,13 @@ class LinkedInScraper:
         self.account_start_time = time.time()
         self.max_session_duration = int(os.getenv('MAX_SESSION_DURATION', '1800'))  # 30 minutes default
         
+        # Initialize OTP handler
+        self.otp_handler = OTPHandler()
+
+        # Track challenge attempts per account
+        self.challenge_attempts = {}
+        self.max_challenge_attempts = 3
+
         self.user_data_dir = Path("./cookies/playwright_user_data")
         self.cookies_file = self.user_data_dir / "linkedin_cookies.json"
         self.account_state_file = Path("./cookies/account_state.json")
@@ -80,7 +87,7 @@ class LinkedInScraper:
             logger.warning(f"Could not load account state: {e}")
         
         # Initialize default state
-        return {account['email']: {'last_used': 0, 'total_scrapes': 0, 'ban_count': 0} 
+        return {account['email']: {'last_used': 0, 'total_scrapes': 0, 'ban_count': 0, 'is_blocked': False} 
                 for account in self.accounts}
 
     def _save_account_state(self):
@@ -93,18 +100,29 @@ class LinkedInScraper:
             logger.error(f"Could not save account state: {e}")
 
     def _get_next_available_account(self):
-        """Get next account that's not in cooldown period"""
+        """Get next account that's not in cooldown period and not blocked"""
         cooldown_hours = int(os.getenv('ACCOUNT_COOLDOWN_HOURS', '6'))
         cooldown_seconds = cooldown_hours * 3600
         current_time = time.time()
         
-        # Try to find an account not in cooldown
+        # Try to find an account not in cooldown and not blocked
         attempts = 0
+        
         while attempts < len(self.accounts):
             account = self.accounts[self.current_account_index]
             email = account['email']
-            last_used = self.account_state.get(email, {}).get('last_used', 0)
+            account_state = self.account_state.get(email, {})
+            last_used = account_state.get('last_used', 0)
+            is_blocked = account_state.get('is_blocked', False)
             
+            # Skip blocked accounts
+            if is_blocked:
+                logger.info(f"⛔ Account {email} is blocked, skipping...")
+                self.current_account_index = (self.current_account_index + 1) % len(self.accounts)
+                attempts += 1
+                continue
+            
+            # Check cooldown
             if current_time - last_used >= cooldown_seconds:
                 logger.info(f"✅ Selected account: {email}")
                 return self.current_account_index
@@ -113,11 +131,22 @@ class LinkedInScraper:
             self.current_account_index = (self.current_account_index + 1) % len(self.accounts)
             attempts += 1
         
-        # If all accounts in cooldown, use the one with oldest last_used
-        logger.warning("⚠️ All accounts in cooldown, using least recently used")
-        oldest_index = min(range(len(self.accounts)), 
-                          key=lambda i: self.account_state.get(self.accounts[i]['email'], {}).get('last_used', 0))
+        # If all accounts are blocked or in cooldown
+        logger.warning("⚠️ All accounts are either blocked or in cooldown")
+        
+        # Try to find least recently used non-blocked account
+        available_accounts = [i for i, acc in enumerate(self.accounts) 
+                            if not self.account_state.get(acc['email'], {}).get('is_blocked', False)]
+        
+        if not available_accounts:
+            logger.error("❌ All accounts are blocked! Cannot continue.")
+            return None
+        
+        # Use the least recently used available account
+        oldest_index = min(available_accounts, 
+                        key=lambda i: self.account_state.get(self.accounts[i]['email'], {}).get('last_used', 0))
         self.current_account_index = oldest_index
+        logger.info(f"Using least recently used available account: {self.accounts[oldest_index]['email']}")
         return oldest_index
 
     def _initialize_browser(self):
@@ -233,7 +262,11 @@ class LinkedInScraper:
             
             # Move to next account
             self.current_account_index = (self.current_account_index + 1) % len(self.accounts)
-            self._get_next_available_account()
+            next_account_index = self._get_next_available_account()
+
+            if next_account_index is None:
+                logger.error("❌ No available accounts to switch to!")
+                return False
             
             # Reset counters
             self.scrape_count = 0
@@ -406,7 +439,7 @@ class LinkedInScraper:
             logger.error(f"Error during login: {str(e)}")
             return False
 
-    def _automated_login(self, profile_url=None):
+    def _automated_login(self, profile_url=None, is_retry=False):
         """Perform automated login using current account credentials."""
         try:
             if not self.accounts:
@@ -417,8 +450,33 @@ class LinkedInScraper:
             email = account['email']
             password = account['password']
             
+            # Check if account is blocked
+            if self.account_state.get(email, {}).get('is_blocked', False):
+                logger.warning(f"⛔ Account {email} is marked as blocked, switching...")
+                if len(self.accounts) > 1:
+                    if self.switch_account():
+                        return self._automated_login(profile_url, is_retry=True)
+                return False
+            
+            # Track challenge attempts for this account
+            if email not in self.challenge_attempts:
+                self.challenge_attempts[email] = 0
+            
+            # If too many challenge attempts, mark as blocked
+            if self.challenge_attempts[email] >= self.max_challenge_attempts:
+                logger.error(f"⛔ Account {email} exceeded challenge attempts ({self.max_challenge_attempts}), marking as blocked")
+                self.account_state[email]['is_blocked'] = True
+                self.account_state[email]['ban_count'] += 1
+                self._save_account_state()
+                
+                # Try next account if available
+                if len(self.accounts) > 1:
+                    if self.switch_account():
+                        return self._automated_login(profile_url, is_retry=True)
+                return False
+            
             logger.info(f"Navigating to LinkedIn login page with account: {email}")
-            self.page.goto("https://www.linkedin.com/login", timeout=60000)  # 60 second timeout
+            self.page.goto("https://www.linkedin.com/login", timeout=60000)
             self.random_delay(2, 3)
             
             # Fill in email
@@ -443,25 +501,48 @@ class LinkedInScraper:
             
             # Check for verification/security challenges
             current_url = self.page.url.lower()
-            if 'checkpoint' in current_url or 'challenge' in current_url:
-                logger.warning("⚠️ Security checkpoint detected!")
+            
+            # Check for OTP/verification challenge
+            if any(indicator in current_url for indicator in ['checkpoint', 'challenge', 'verify']):
+                logger.warning(f"⚠️ Security checkpoint/OTP verification detected for {email}!")
                 
-                # Mark account and switch if multiple accounts available
+                # Increment challenge attempts
+                self.challenge_attempts[email] += 1
+                
+                # Try to handle OTP verification using OTP handler
+                otp_handled = self.otp_handler.handle_otp_verification(self.page, email)
+                
+                if otp_handled:
+                    # Check if login successful after OTP
+                    self.random_delay(3, 5)
+                    if self._is_logged_in():
+                        logger.info(f"✅ OTP verification successful for {email}!")
+                        self.challenge_attempts[email] = 0  # Reset attempts on success
+                        self.save_cookies()
+                        
+                        if email in self.account_state:
+                            self.account_state[email]['last_used'] = time.time()
+                            self._save_account_state()
+                        
+                        if profile_url:
+                            self.page.goto(profile_url)
+                            self.random_delay()
+                        return True
+                
+                # OTP handling failed, switch account if available
                 if len(self.accounts) > 1:
-                    if email in self.account_state:
-                        self.account_state[email]['ban_count'] += 1
-                        self._save_account_state()
-                    
-                    logger.info("Switching to next account due to challenge...")
-                    self.switch_account()
-                    return self._automated_login(profile_url)
+                    logger.info(f"Switching to next account due to challenge (attempt {self.challenge_attempts[email]}/{self.max_challenge_attempts})...")
+                    if self.switch_account():
+                        return self._automated_login(profile_url, is_retry=True)
                 else:
                     logger.error("Only one account available and it's challenged")
-                    return False
+                
+                return False
             
             # Verify login success
             if self._is_logged_in():
                 logger.info(f"✅ Automated login successful with {email}!")
+                self.challenge_attempts[email] = 0  # Reset attempts on success
                 self.save_cookies()
                 
                 # Update account state
@@ -475,23 +556,24 @@ class LinkedInScraper:
                 return True
             else:
                 logger.error(f"❌ Automated login failed with {email}")
+                self.challenge_attempts[email] += 1
                 
-                # Try next account if available
-                if len(self.accounts) > 1:
+                # Try next account if available and not a retry
+                if len(self.accounts) > 1 and not is_retry:
                     logger.info("Trying next account...")
-                    self.switch_account()
-                    return self._automated_login(profile_url)
+                    if self.switch_account():
+                        return self._automated_login(profile_url, is_retry=True)
                 
                 return False
                 
         except Exception as e:
             logger.error(f"Error during automated login: {str(e)}")
             
-            # Try next account on error if available
-            if len(self.accounts) > 1:
+            # Only try next account if not already retrying
+            if len(self.accounts) > 1 and not is_retry:
                 logger.info("Switching to next account due to error...")
-                self.switch_account()
-                return self._automated_login(profile_url)
+                if self.switch_account():
+                    return self._automated_login(profile_url, is_retry=True)
             
             return False
 
@@ -1055,7 +1137,8 @@ class LinkedInScraper:
                 'email': email,
                 'total_scrapes': account_info.get('total_scrapes', 0),
                 'last_used': account_info.get('last_used', 0),
-                'ban_count': account_info.get('ban_count', 0)
+                'ban_count': account_info.get('ban_count', 0),
+                'is_blocked': account_info.get('is_blocked', False)
             })
         
         return stats
