@@ -64,8 +64,25 @@ def scrape_profile():
         # Initialize data containers
         linkedin_data = {}
         github_data = {}
+        resume_data = {}
         
-        # Scrape LinkedIn data if URL provided
+        # Priority 1: Parse resume first (highest priority)
+        if resume_file:
+            print("Parsing resume...")
+            # Save uploaded file temporarily
+            filename = resume_file.filename
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            resume_file.save(filepath)
+            
+            # Parse resume
+            resume_data = resume_parser.parse_resume(filepath)
+            
+            # Clean up uploaded file
+            os.remove(filepath)
+        else:
+            print("No resume file provided, skipping resume parsing")
+        
+        # Priority 2: Scrape LinkedIn data (medium priority)
         if linkedin_url:
             print(f"Scraping LinkedIn: {linkedin_url} (headless: {headless_mode})")
             try:
@@ -104,7 +121,7 @@ def scrape_profile():
                 'certificates': []
             }
         
-        # Scrape GitHub data if URL provided
+        # Priority 3: Scrape GitHub data (lowest priority)
         if github_url:
             print(f"Scraping GitHub: {github_url}")
             try:
@@ -115,21 +132,6 @@ def scrape_profile():
         else:
             print("No GitHub URL provided, skipping GitHub scraping")
             github_data = {}
-        
-        # Parse resume if provided
-        resume_data = {}
-        if resume_file:
-            print("Parsing resume...")
-            # Save uploaded file temporarily
-            filename = resume_file.filename
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            resume_file.save(filepath)
-            
-            # Parse resume
-            resume_data = resume_parser.parse_resume(filepath)
-            
-            # Clean up uploaded file
-            os.remove(filepath)
         
         # Combine all data
         portfolio_data = combine_profile_data(linkedin_data, github_data, resume_data)
@@ -267,8 +269,8 @@ def combine_profile_data(linkedin_data, github_data, resume_data):
                 }
                 portfolio['certificates'].append(portfolio_cert)
         
-        # Add summary/about from resume if available
-        if resume_data.get('summary') and not portfolio['about']:
+        # Override about/summary with resume data (highest priority)
+        if resume_data.get('summary'):
             portfolio['about'] = resume_data['summary']
     
     # Fallback values if still empty
