@@ -68,7 +68,7 @@ def scrape_profile():
         
         # Priority 1: Parse resume first (highest priority)
         if resume_file:
-            print("Parsing resume...")
+            print("📄 Step 1/4: Parsing resume...")
             # Save uploaded file temporarily
             filename = resume_file.filename
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -79,16 +79,17 @@ def scrape_profile():
             
             # Clean up uploaded file
             os.remove(filepath)
+            print("✅ Resume parsing completed")
         else:
-            print("No resume file provided, skipping resume parsing")
+            print("📄 Step 1/4: No resume file provided, skipping resume parsing")
         
         # Priority 2: Scrape LinkedIn data (medium priority)
         if linkedin_url:
-            print(f"Scraping LinkedIn: {linkedin_url} (headless: {headless_mode})")
+            print(f"🔗 Step 2/4: Scraping LinkedIn: {linkedin_url} (headless: {headless_mode})")
             try:
                 linkedin_data = scrape_linkedin_profile(linkedin_url, headless=headless_mode)
                 if not linkedin_data or linkedin_data.get('name') == 'John Doe':
-                    print("LinkedIn scraping returned dummy data, using empty fallback")
+                    print("⚠️ LinkedIn scraping returned dummy data, using empty fallback")
                     linkedin_data = {
                         'name': '',
                         'headline': '',
@@ -98,8 +99,10 @@ def scrape_profile():
                         'education': [],
                         'certificates': []
                     }
+                else:
+                    print("✅ LinkedIn scraping completed successfully")
             except Exception as e:
-                print(f"LinkedIn scraping failed: {e}")
+                print(f"❌ LinkedIn scraping failed: {e}")
                 linkedin_data = {
                     'name': '',
                     'headline': '',
@@ -110,7 +113,7 @@ def scrape_profile():
                     'certificates': []
                 }
         else:
-            print("No LinkedIn URL provided, skipping LinkedIn scraping")
+            print("🔗 Step 2/4: No LinkedIn URL provided, skipping LinkedIn scraping")
             linkedin_data = {
                 'name': '',
                 'headline': '',
@@ -123,17 +126,19 @@ def scrape_profile():
         
         # Priority 3: Scrape GitHub data (lowest priority)
         if github_url:
-            print(f"Scraping GitHub: {github_url}")
+            print(f"🐙 Step 3/4: Scraping GitHub: {github_url}")
             try:
                 github_data = github_scraper.scrape_profile(github_url)
+                print("✅ GitHub scraping completed successfully")
             except Exception as e:
-                print(f"GitHub scraping failed: {e}")
+                print(f"❌ GitHub scraping failed: {e}")
                 github_data = {}
         else:
-            print("No GitHub URL provided, skipping GitHub scraping")
+            print("🐙 Step 3/4: No GitHub URL provided, skipping GitHub scraping")
             github_data = {}
         
         # Combine all data
+        print("🔄 Step 4/4: Combining and processing data...")
         portfolio_data = combine_profile_data(linkedin_data, github_data, resume_data)
         
         # Enhance portfolio content with AI-generated headlines and summaries
@@ -160,6 +165,7 @@ def scrape_profile():
         if portfolio_data.get('certificates'):
             print(f"  - Certificate names: {[c.get('certificate') for c in portfolio_data['certificates']]}")
         
+        print("🎉 Portfolio generation completed successfully!")
         return jsonify(portfolio_data)
         
     except Exception as e:
@@ -167,7 +173,7 @@ def scrape_profile():
         return jsonify({'error': f'Failed to scrape profile: {str(e)}'}), 500
 
 def combine_profile_data(linkedin_data, github_data, resume_data):
-    """Combine data from different sources with priority: Resume > LinkedIn > GitHub"""
+    """Combine data from different sources with section-wise priorities"""
     
     # Initialize portfolio with empty data
     portfolio = {
@@ -178,13 +184,54 @@ def combine_profile_data(linkedin_data, github_data, resume_data):
         'skills': [],
         'education': [],
         'certificates': [],
-        'projects': []
+        'projects': [],
+        'contact': {}
     }
     
-    # Priority 3: GitHub data (lowest priority)
+    # Track data sources for each section (for future user switching)
+    data_sources = {
+        'name': {'resume': '', 'linkedin': '', 'github': ''},
+        'headline': {'resume': '', 'linkedin': '', 'github': ''},
+        'about': {'resume': '', 'linkedin': '', 'github': ''},
+        'experience': {'resume': [], 'linkedin': [], 'github': []},
+        'skills': {'resume': [], 'linkedin': [], 'github': []},
+        'education': {'resume': [], 'linkedin': [], 'github': []},
+        'certificates': {'resume': [], 'linkedin': [], 'github': []},
+        'projects': {'resume': [], 'linkedin': [], 'github': []},
+        'contact': {'resume': {}, 'linkedin': {}, 'github': {}}
+    }
+    
+    # Collect data from all sources
+    collect_all_source_data(data_sources, linkedin_data, github_data, resume_data)
+    
+    # Apply section-wise priorities with fallback
+    apply_section_priorities(portfolio, data_sources)
+    
+    # Add fallback values if still empty
+    add_fallback_values(portfolio)
+    
+    return portfolio
+
+def collect_all_source_data(data_sources, linkedin_data, github_data, resume_data):
+    """Collect data from all sources into organized structure"""
+    
+    # Collect LinkedIn data
+    if linkedin_data:
+        data_sources['name']['linkedin'] = linkedin_data.get('name', '')
+        data_sources['headline']['linkedin'] = linkedin_data.get('headline', '')
+        data_sources['about']['linkedin'] = linkedin_data.get('about', '')
+        data_sources['experience']['linkedin'] = linkedin_data.get('experience', [])
+        data_sources['skills']['linkedin'] = linkedin_data.get('skills', [])
+        data_sources['education']['linkedin'] = linkedin_data.get('education', [])
+        data_sources['certificates']['linkedin'] = linkedin_data.get('certificates', [])
+        # LinkedIn rarely has projects, but just in case
+        data_sources['projects']['linkedin'] = linkedin_data.get('projects', [])
+    
+    # Collect GitHub data
     if github_data:
-        # Add GitHub projects
+        # GitHub projects from repositories
         if github_data.get('repositories'):
+            github_projects = []
             for repo in github_data['repositories']:
                 project = {
                     'name': repo.get('name', ''),
@@ -194,72 +241,53 @@ def combine_profile_data(linkedin_data, github_data, resume_data):
                     'stars': repo.get('stargazers_count', 0),
                     'technologies': repo.get('topics', [])
                 }
-                portfolio['projects'].append(project)
+                github_projects.append(project)
+            data_sources['projects']['github'] = github_projects
         
-        # Use GitHub profile data if available
+        # GitHub profile data
         if github_data.get('profile'):
             profile = github_data['profile']
-            if not portfolio['name'] and profile.get('name'):
-                portfolio['name'] = profile['name']
-            if not portfolio['about'] and profile.get('bio'):
-                portfolio['about'] = profile['bio']
+            data_sources['name']['github'] = profile.get('name', '')
+            data_sources['about']['github'] = profile.get('bio', '')
     
-    # Priority 2: LinkedIn data (medium priority) - overwrites GitHub data
-    if linkedin_data:
-        if linkedin_data.get('name'):
-            portfolio['name'] = linkedin_data['name']
-        if linkedin_data.get('headline'):
-            portfolio['headline'] = linkedin_data['headline']
-        if linkedin_data.get('about'):
-            portfolio['about'] = linkedin_data['about']
-        if linkedin_data.get('experience'):
-            portfolio['experience'] = linkedin_data['experience']
-        if linkedin_data.get('skills'):
-            portfolio['skills'] = linkedin_data['skills']
-        if linkedin_data.get('education'):
-            portfolio['education'] = linkedin_data['education']
-        if linkedin_data.get('certificates'):
-            portfolio['certificates'] = linkedin_data['certificates']
-    
-    # Priority 1: Resume data (highest priority) - overwrites everything
+    # Collect Resume data
     if resume_data:
-        # Override basic info if available in resume
+        # Basic info
         if resume_data.get('contact', {}).get('name'):
-            portfolio['name'] = resume_data['contact']['name']
+            data_sources['name']['resume'] = resume_data['contact']['name']
         
-        # Override experience with resume data (highest priority)
-        if resume_data.get('experience'):
-            portfolio['experience'] = resume_data['experience']
-        
-        # Override skills with resume data if more comprehensive
-        if resume_data.get('skills'):
-            portfolio['skills'] = resume_data['skills']
-        
-        # Override education with resume data
-        if resume_data.get('education'):
-            portfolio['education'] = resume_data['education']
-        
-        # Add contact information from resume
+        # Contact info
         if resume_data.get('contact'):
-            portfolio['contact'] = resume_data['contact']
+            data_sources['contact']['resume'] = resume_data['contact']
         
-        # Add projects from resume (merge with GitHub projects)
+        # Resume summary as both headline and about
+        if resume_data.get('summary'):
+            data_sources['headline']['resume'] = resume_data['summary']
+            data_sources['about']['resume'] = resume_data['summary']
+        
+        # Experience, skills, education
+        data_sources['experience']['resume'] = resume_data.get('experience', [])
+        data_sources['skills']['resume'] = resume_data.get('skills', [])
+        data_sources['education']['resume'] = resume_data.get('education', [])
+        
+        # Resume projects
         if resume_data.get('projects'):
-            # Convert resume projects to expected format
+            resume_projects = []
             for project in resume_data['projects']:
                 portfolio_project = {
                     'name': project.get('name', ''),
                     'description': project.get('description', ''),
                     'link': project.get('link', ''),
-                    'github': project.get('link', ''),  # Use link as github if available
-                    'stars': 0,  # Resume projects don't have stars
+                    'github': project.get('link', ''),
+                    'stars': 0,
                     'technologies': project.get('technologies', [])
                 }
-                portfolio['projects'].append(portfolio_project)
+                resume_projects.append(portfolio_project)
+            data_sources['projects']['resume'] = resume_projects
         
-        # Add certifications from resume (merge with LinkedIn certificates)
+        # Resume certifications
         if resume_data.get('certifications'):
-            # Convert resume certifications to expected format
+            resume_certs = []
             for cert in resume_data['certifications']:
                 portfolio_cert = {
                     'certificate': cert.get('certificate', ''),
@@ -267,24 +295,65 @@ def combine_profile_data(linkedin_data, github_data, resume_data):
                     'date': cert.get('date', ''),
                     'link': cert.get('link', '')
                 }
-                portfolio['certificates'].append(portfolio_cert)
-        
-        # Override about/summary with resume data (highest priority)
-        if resume_data.get('summary'):
-            portfolio['about'] = resume_data['summary']
+                resume_certs.append(portfolio_cert)
+            data_sources['certificates']['resume'] = resume_certs
+
+def apply_section_priorities(portfolio, data_sources):
+    """Apply section-wise priorities with fallback logic"""
     
-    # Fallback values if still empty
-    if not portfolio['name']:
+    # Section-wise priority definitions
+    priorities = {
+        'projects': ['github', 'resume', 'linkedin'],      # GitHub > Resume > LinkedIn
+        'headline': ['linkedin', 'resume', 'github'],      # LinkedIn > Resume > GitHub  
+        'about': ['linkedin', 'resume', 'github'],         # LinkedIn > Resume > GitHub
+        'experience': ['resume', 'linkedin', 'github'],    # Resume > LinkedIn > GitHub
+        'skills': ['resume', 'linkedin', 'github'],        # Resume > LinkedIn > GitHub
+        'education': ['resume', 'linkedin', 'github'],     # Resume > LinkedIn > GitHub
+        'certificates': ['linkedin', 'resume', 'github'],  # LinkedIn > Resume > GitHub
+        'contact': ['resume', 'linkedin', 'github'],       # Resume > LinkedIn > GitHub
+        'name': ['resume', 'linkedin', 'github']           # Resume > LinkedIn > GitHub
+    }
+    
+    # Apply priorities with fallback
+    for section, priority_order in priorities.items():
+        for source in priority_order:
+            source_data = data_sources[section][source]
+            
+            # Check if source has meaningful data
+            if has_meaningful_data(source_data):
+                portfolio[section] = source_data
+                print(f"📊 Using {source} data for {section}")
+                break  # Stop at first meaningful source
+        
+        # If no meaningful data found, keep empty (will get fallback later)
+        if not has_meaningful_data(portfolio.get(section)):
+            print(f"⚠️ No meaningful data found for {section}")
+
+def has_meaningful_data(data):
+    """Check if data is meaningful (not empty, not just whitespace)"""
+    if data is None:
+        return False
+    if isinstance(data, str):
+        return bool(data.strip())
+    if isinstance(data, list):
+        return len(data) > 0
+    if isinstance(data, dict):
+        return bool(data)
+    return bool(data)
+
+def add_fallback_values(portfolio):
+    """Add fallback values for empty sections"""
+    if not portfolio.get('name'):
         portfolio['name'] = 'Professional User'
-    if not portfolio['headline']:
+    if not portfolio.get('headline'):
         portfolio['headline'] = 'Experienced Professional'
-    if not portfolio['about']:
+    if not portfolio.get('about'):
         portfolio['about'] = 'Dedicated professional with extensive experience in their field.'
     
-    # Remove duplicates and clean data
-    portfolio['skills'] = list(dict.fromkeys(portfolio['skills']))  # Remove duplicate skills while preserving order
-    
-    return portfolio
+    # Remove duplicate skills while preserving order
+    if portfolio.get('skills'):
+        portfolio['skills'] = list(dict.fromkeys(portfolio['skills']))
+
 
 @app.route('/enhance-headline', methods=['POST'])
 def enhance_headline():

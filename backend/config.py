@@ -1,14 +1,14 @@
 # Configuration settings for AutoPortfolio backend
 
 # Selenium/Playwright timeout settings
-SELENIUM_TIMEOUT = 10  # seconds
+SELENIUM_TIMEOUT = 30  # seconds (increased for complex LinkedIn pages)
 
 # LinkedIn scraper settings
 LINKEDIN_HEADLESS = True
 LINKEDIN_COOKIE_EXPIRY = 30  # days
 
 # GitHub API settings
-GITHUB_API_TIMEOUT = 10  # seconds
+GITHUB_API_TIMEOUT = 30  # seconds (increased for reliability)
 GITHUB_MAX_REPOS = 10
 
 # File upload settings

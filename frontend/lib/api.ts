@@ -5,7 +5,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://auto-portfo
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  timeout: 60000, // 60 seconds for scraping operations
+  timeout: 180000, // 3 minutes for scraping operations (Resume + LinkedIn + GitHub can take time)
 });
 
 export async function healthCheck(): Promise<boolean> {
@@ -36,6 +36,7 @@ export async function scrapeProfile(
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      timeout: 300000, // 5 minutes for scraping operations (Resume + LinkedIn + GitHub)
     });
 
     return response.data;
